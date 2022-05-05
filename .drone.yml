@@ -1,0 +1,16 @@
+kind: pipeline
+name: default
+
+steps:
+- name: docker  
+  image: plugins/docker
+  settings:
+    username:
+      from_secret: docker_username
+    password:
+      from_secret: docker_password     
+    repo: ghcr.io/streato/send
+    registry: ghcr.io
+    tags:
+      - latest
+      - '2022.4.1'
