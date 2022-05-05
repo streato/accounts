@@ -1,5 +1,5 @@
 # Stage 1: Build website
-FROM --platform=${BUILDPLATFORM} docker.io/node:16 as website-builder
+FROM --platform=amd64 docker.io/node:16 as website-builder
 
 COPY ./website /work/website/
 
@@ -7,7 +7,7 @@ ENV NODE_ENV=production
 RUN cd /work/website && npm i && npm run build-docs-only
 
 # Stage 2: Build webui
-FROM --platform=${BUILDPLATFORM} docker.io/node:16 as web-builder
+FROM --platform=amd64 docker.io/node:16 as web-builder
 
 COPY ./web /work/web/
 COPY ./website /work/website/
