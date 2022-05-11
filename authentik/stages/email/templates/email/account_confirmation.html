@@ -6,10 +6,10 @@
 {% block content %}
 <td>
   <h2>
-    {% trans 'Welcome!' %}
+    {% trans 'Bienvenue !' %}
   </h2>
   <p>
-    {% trans "We're excited to have you get started. First, you need to confirm your account. Just press the button below."%}
+    {% trans "Nous sommes ravis que vous nous avez rejoint. Tout d'abord, vous devez confirmer votre compte. Appuyez simplement sur le bouton ci-dessous."%}
   </p>
   <table role="presentation" border="0" cellpadding="0" cellspacing="0" class="btn btn-primary">
     <tbody>
@@ -18,7 +18,7 @@
           <table role="presentation" border="0" cellpadding="0" cellspacing="0">
             <tbody>
               <tr>
-                <td> <a id="confirm" href="{{ url }}" rel="noopener noreferrer" target="_blank">{% trans 'Confirm Account' %}</a> </td>
+                <td> <a id="confirm" href="{{ url }}" rel="noopener noreferrer" target="_blank">{% trans 'Confirmer le compte' %}</a> </td>
               </tr>
             </tbody>
           </table>
@@ -28,11 +28,11 @@
   </table>
   <p>
     {% blocktrans with url=url %}
-    If that doesn't work, copy and paste the following link in your browser: {{ url }}
+    Si cela ne fonctionne pas, copiez et collez le lien suivant dans votre navigateur : {{ url }}
     {% endblocktrans %}
   </p>
   <p>
-    {% trans "If you have any questions, just reply to this email—we're always happy to help out." %}
+    {% trans "Si vous avez des questions, répondez simplement à cet e-mail ou écrivez-nous sur notre Instagram @strea.to. Nous serons toujours ravis de vous aider." %}
   </p>
 </td>
 {% endblock %}
