@@ -1,5 +1,5 @@
 # Stage 1: Build website
-FROM --platform=${BUILDPLATFORM} docker.io/node:18 as website-builder
+FROM --platform=amd64 docker.io/node:18 as website-builder
 
 COPY ./website /work/website/
 
@@ -8,7 +8,7 @@ WORKDIR /work/website
 RUN npm ci && npm run build-docs-only
 
 # Stage 2: Build webui
-FROM --platform=${BUILDPLATFORM} docker.io/node:18 as web-builder
+FROM --platform=amd64 docker.io/node:18 as web-builder
 
 COPY ./web /work/web/
 COPY ./website /work/website/
