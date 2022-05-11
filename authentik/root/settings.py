@@ -60,11 +60,10 @@ LOGIN_URL = "authentik_flows:default-authentication"
 # Custom user model
 AUTH_USER_MODEL = "authentik_core.User"
 
-_cookie_suffix = "_debug" if DEBUG else ""
 CSRF_COOKIE_NAME = "authentik_csrf"
 CSRF_HEADER_NAME = "HTTP_X_AUTHENTIK_CSRF"
-LANGUAGE_COOKIE_NAME = f"authentik_language{_cookie_suffix}"
-SESSION_COOKIE_NAME = f"authentik_session{_cookie_suffix}"
+LANGUAGE_COOKIE_NAME = "authentik_language"
+SESSION_COOKIE_NAME = "authentik_session"
 SESSION_COOKIE_DOMAIN = CONFIG.y("cookie_domain", None)
 
 AUTHENTICATION_BACKENDS = [
@@ -167,6 +166,7 @@ SPECTACULAR_SETTINGS = {
         "PolicyEngineMode": "authentik.policies.models.PolicyEngineMode",
         "ProxyMode": "authentik.providers.proxy.models.ProxyMode",
         "PromptTypeEnum": "authentik.stages.prompt.models.FieldTypes",
+        "LDAPAPIAccessMode": "authentik.providers.ldap.models.APIAccessMode",
     },
     "ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE": False,
     "POSTPROCESSING_HOOKS": [
@@ -227,6 +227,7 @@ SESSION_CACHE_ALIAS = "default"
 # SESSION_COOKIE_SAMESITE = "None"
 # SESSION_COOKIE_SECURE = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True
 
 MESSAGE_STORAGE = "authentik.root.messages.storage.ChannelsStorage"
 
