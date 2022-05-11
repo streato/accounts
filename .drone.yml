@@ -13,3 +13,4 @@ steps:
     registry: ghcr.io
     tags:
       - latest
+      - master
