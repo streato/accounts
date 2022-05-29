@@ -1,3 +1,5 @@
+import { t } from "@lingui/macro";
+
 import { CSSResult } from "lit";
 import { TemplateResult, html } from "lit";
 import { ifDefined } from "lit/directives/if-defined.js";
@@ -7,6 +9,7 @@ import PFPage from "@patternfly/patternfly/components/Page/page.css";
 import PFSidebar from "@patternfly/patternfly/components/Sidebar/sidebar.css";
 
 import "../../elements/PageHeader";
+import { updateURLParams } from "../router/RouteMatch";
 import { Table } from "./Table";
 
 export abstract class TablePage<T> extends Table<T> {
@@ -24,6 +27,46 @@ export abstract class TablePage<T> extends Table<T> {
 
     renderSidebarAfter(): TemplateResult {
         return html``;
+    }
+
+    renderEmpty(inner?: TemplateResult): TemplateResult {
+        return super.renderEmpty(html`
+            ${inner
+                ? inner
+                : html`<ak-empty-state icon=${this.pageIcon()} header="${t`No objects found.`}">
+                      <div slot="body">
+                          ${this.searchEnabled() ? this.renderEmptyClearSearch() : html``}
+                      </div>
+                      <div slot="primary">${this.renderObjectCreate()}</div>
+                  </ak-empty-state>`}
+        `);
+    }
+
+    renderEmptyClearSearch(): TemplateResult {
+        if (this.search === "") {
+            return html``;
+        }
+        return html`<button
+            @click=${() => {
+                this.search = "";
+                this.requestUpdate();
+                this.fetch();
+                updateURLParams({
+                    search: "",
+                });
+            }}
+            class="pf-c-button pf-m-link"
+        >
+            ${t`Clear search`}
+        </button>`;
+    }
+
+    renderObjectCreate(): TemplateResult {
+        return html``;
+    }
+
+    renderToolbar(): TemplateResult {
+        return html`${this.renderObjectCreate()}${super.renderToolbar()}`;
     }
 
     render(): TemplateResult {

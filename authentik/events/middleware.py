@@ -26,9 +26,9 @@ IGNORED_MODELS = [
     StaticToken,
 ]
 if settings.DEBUG:
-    from silk.models import Request, Response
+    from silk.models import Request, Response, SQLQuery
 
-    IGNORED_MODELS += [Request, Response]
+    IGNORED_MODELS += [Request, Response, SQLQuery]
 IGNORED_MODELS = tuple(IGNORED_MODELS)
 
 

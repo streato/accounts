@@ -96,9 +96,9 @@ func NewApplication(p api.ProxyOutpostConfig, c *http.Client, cs *ak.CryptoStore
 		errorTemplates: templates.GetTemplates(),
 		ak:             ak,
 	}
-	a.sessions = a.getStore(p)
+	a.sessions = a.getStore(p, externalHost)
 	mux.Use(web.NewLoggingHandler(muxLogger, func(l *log.Entry, r *http.Request) *log.Entry {
-		s, err := a.sessions.Get(r, constants.SeesionName)
+		s, err := a.sessions.Get(r, constants.SessionName)
 		if err != nil {
 			return l
 		}
@@ -134,11 +134,9 @@ func NewApplication(p api.ProxyOutpostConfig, c *http.Client, cs *ak.CryptoStore
 			metrics.Requests.With(prometheus.Labels{
 				"outpost_name": a.outpostName,
 				"type":         "app",
-				"scheme":       r.URL.Scheme,
 				"method":       r.Method,
-				"path":         r.URL.Path,
 				"host":         web.GetHost(r),
-				"user":         user,
+				"scheme":       r.URL.Scheme,
 			}).Observe(float64(after))
 		})
 	})
@@ -149,7 +147,7 @@ func NewApplication(p api.ProxyOutpostConfig, c *http.Client, cs *ak.CryptoStore
 	mux.HandleFunc("/outpost.goauthentik.io/sign_in", a.handleRedirect)
 	mux.HandleFunc("/outpost.goauthentik.io/callback", a.handleCallback)
 	mux.HandleFunc("/outpost.goauthentik.io/sign_out", a.handleSignOut)
-	switch *p.Mode {
+	switch *p.Mode.Get() {
 	case api.PROXYMODE_PROXY:
 		err = a.configureProxy()
 	case api.PROXYMODE_FORWARD_SINGLE:
@@ -186,7 +184,7 @@ func NewApplication(p api.ProxyOutpostConfig, c *http.Client, cs *ak.CryptoStore
 }
 
 func (a *Application) Mode() api.ProxyMode {
-	return *a.proxyConfig.Mode
+	return *a.proxyConfig.Mode.Get()
 }
 
 func (a *Application) ProxyConfig() api.ProxyOutpostConfig {
@@ -199,7 +197,7 @@ func (a *Application) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
 
 func (a *Application) handleSignOut(rw http.ResponseWriter, r *http.Request) {
 	//TODO: Token revocation
-	s, err := a.sessions.Get(r, constants.SeesionName)
+	s, err := a.sessions.Get(r, constants.SessionName)
 	if err != nil {
 		http.Redirect(rw, r, a.endpint.EndSessionEndpoint, http.StatusFound)
 		return

@@ -14,6 +14,7 @@ import { DEFAULT_CONFIG, config, tenant } from "../../api/Config";
 import { me } from "../../api/Users";
 import { uiConfig } from "../../common/config";
 import { PFColor } from "../../elements/Label";
+import { PFSize } from "../../elements/Spinner";
 import "../../elements/buttons/ActionButton";
 import "../../elements/forms/DeleteBulkForm";
 import "../../elements/forms/ModalForm";
@@ -215,7 +216,7 @@ export class UserListPage extends TablePage<User> {
                             </dt>
                             <dd class="pf-c-description-list__description">
                                 <div class="pf-c-description-list__text">
-                                    <ak-forms-modal>
+                                    <ak-forms-modal size=${PFSize.Medium}>
                                         <span slot="submit">${t`Update password`}</span>
                                         <span slot="header">${t`Update password`}</span>
                                         <ak-user-password-form
@@ -300,7 +301,7 @@ export class UserListPage extends TablePage<User> {
             <td></td>`;
     }
 
-    renderToolbar(): TemplateResult {
+    renderObjectCreate(): TemplateResult {
         return html`
             <ak-forms-modal>
                 <span slot="submit"> ${t`Create`} </span>
@@ -316,7 +317,6 @@ export class UserListPage extends TablePage<User> {
                     ${t`Create Service account`}
                 </button>
             </ak-forms-modal>
-            ${super.renderToolbar()}
         `;
     }
 

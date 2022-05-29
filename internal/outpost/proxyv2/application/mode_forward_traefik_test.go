@@ -47,7 +47,7 @@ func TestForwardHandleTraefik_Single_Headers(t *testing.T) {
 	loc, _ := rr.Result().Location()
 	assert.Equal(t, loc.String(), "http://test.goauthentik.io/outpost.goauthentik.io/start")
 
-	s, _ := a.sessions.Get(req, constants.SeesionName)
+	s, _ := a.sessions.Get(req, constants.SessionName)
 	assert.Equal(t, "http://test.goauthentik.io/app", s.Values[constants.SessionRedirect])
 }
 
@@ -61,7 +61,7 @@ func TestForwardHandleTraefik_Single_Claims(t *testing.T) {
 	rr := httptest.NewRecorder()
 	a.forwardHandleTraefik(rr, req)
 
-	s, _ := a.sessions.Get(req, constants.SeesionName)
+	s, _ := a.sessions.Get(req, constants.SessionName)
 	s.Values[constants.SessionClaims] = Claims{
 		Sub: "foo",
 		Proxy: &ProxyClaims{
@@ -100,7 +100,7 @@ func TestForwardHandleTraefik_Single_Claims(t *testing.T) {
 
 func TestForwardHandleTraefik_Domain_Blank(t *testing.T) {
 	a := newTestApplication()
-	a.proxyConfig.Mode = api.PROXYMODE_FORWARD_DOMAIN.Ptr()
+	a.proxyConfig.Mode = *api.NewNullableProxyMode(api.PROXYMODE_FORWARD_DOMAIN.Ptr())
 	a.proxyConfig.CookieDomain = api.PtrString("foo")
 	req, _ := http.NewRequest("GET", "/outpost.goauthentik.io/auth/traefik", nil)
 
@@ -112,7 +112,7 @@ func TestForwardHandleTraefik_Domain_Blank(t *testing.T) {
 
 func TestForwardHandleTraefik_Domain_Header(t *testing.T) {
 	a := newTestApplication()
-	a.proxyConfig.Mode = api.PROXYMODE_FORWARD_DOMAIN.Ptr()
+	a.proxyConfig.Mode = *api.NewNullableProxyMode(api.PROXYMODE_FORWARD_DOMAIN.Ptr())
 	a.proxyConfig.CookieDomain = api.PtrString("foo")
 	a.proxyConfig.ExternalHost = "http://auth.test.goauthentik.io"
 	req, _ := http.NewRequest("GET", "/outpost.goauthentik.io/auth/traefik", nil)
@@ -127,6 +127,6 @@ func TestForwardHandleTraefik_Domain_Header(t *testing.T) {
 	loc, _ := rr.Result().Location()
 	assert.Equal(t, "http://auth.test.goauthentik.io/outpost.goauthentik.io/start", loc.String())
 
-	s, _ := a.sessions.Get(req, constants.SeesionName)
+	s, _ := a.sessions.Get(req, constants.SessionName)
 	assert.Equal(t, "http://test.goauthentik.io/app", s.Values[constants.SessionRedirect])
 }

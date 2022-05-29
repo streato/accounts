@@ -47,8 +47,7 @@ func (ms *MemorySearcher) Search(req *search.Request) (ldap.ServerSearchResult, 
 			"outpost_name": ms.si.GetOutpostName(),
 			"type":         "search",
 			"reason":       "filter_parse_fail",
-			"dn":           req.BindDN,
-			"client":       req.RemoteAddr(),
+			"app":          ms.si.GetAppSlug(),
 		}).Inc()
 		return ldap.ServerSearchResult{ResultCode: ldap.LDAPResultOperationsError}, fmt.Errorf("Search Error: error parsing filter: %s", req.Filter)
 	}
@@ -57,8 +56,7 @@ func (ms *MemorySearcher) Search(req *search.Request) (ldap.ServerSearchResult, 
 			"outpost_name": ms.si.GetOutpostName(),
 			"type":         "search",
 			"reason":       "empty_bind_dn",
-			"dn":           req.BindDN,
-			"client":       req.RemoteAddr(),
+			"app":          ms.si.GetAppSlug(),
 		}).Inc()
 		return ldap.ServerSearchResult{ResultCode: ldap.LDAPResultInsufficientAccessRights}, fmt.Errorf("Search Error: Anonymous BindDN not allowed %s", req.BindDN)
 	}
@@ -67,21 +65,19 @@ func (ms *MemorySearcher) Search(req *search.Request) (ldap.ServerSearchResult, 
 			"outpost_name": ms.si.GetOutpostName(),
 			"type":         "search",
 			"reason":       "invalid_bind_dn",
-			"dn":           req.BindDN,
-			"client":       req.RemoteAddr(),
+			"app":          ms.si.GetAppSlug(),
 		}).Inc()
 		return ldap.ServerSearchResult{ResultCode: ldap.LDAPResultInsufficientAccessRights}, fmt.Errorf("Search Error: BindDN %s not in our BaseDN %s", req.BindDN, ms.si.GetBaseDN())
 	}
 
-	flags, ok := ms.si.GetFlags(req.BindDN)
-	if !ok {
+	flags := ms.si.GetFlags(req.BindDN)
+	if flags == nil {
 		req.Log().Debug("User info not cached")
 		metrics.RequestsRejected.With(prometheus.Labels{
 			"outpost_name": ms.si.GetOutpostName(),
 			"type":         "search",
 			"reason":       "user_info_not_cached",
-			"dn":           req.BindDN,
-			"client":       req.RemoteAddr(),
+			"app":          ms.si.GetAppSlug(),
 		}).Inc()
 		return ldap.ServerSearchResult{ResultCode: ldap.LDAPResultInsufficientAccessRights}, errors.New("access denied")
 	}
@@ -141,7 +137,7 @@ func (ms *MemorySearcher) Search(req *search.Request) (ldap.ServerSearchResult, 
 					if flags.UserPk == u.Pk {
 						//TODO: Is there a better way to clone this object?
 						fg := api.NewGroup(g.Pk, g.NumPk, g.Name, g.Parent, g.ParentName, []int32{flags.UserPk}, []api.GroupMember{u})
-						fg.SetAttributes(*g.Attributes)
+						fg.SetAttributes(g.Attributes)
 						fg.SetIsSuperuser(*g.IsSuperuser)
 						groups = append(groups, group.FromAPIGroup(*fg, ms.si))
 						break

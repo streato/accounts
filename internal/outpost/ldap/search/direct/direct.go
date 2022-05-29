@@ -44,8 +44,7 @@ func (ds *DirectSearcher) Search(req *search.Request) (ldap.ServerSearchResult, 
 			"outpost_name": ds.si.GetOutpostName(),
 			"type":         "search",
 			"reason":       "filter_parse_fail",
-			"dn":           req.BindDN,
-			"client":       req.RemoteAddr(),
+			"app":          ds.si.GetAppSlug(),
 		}).Inc()
 		return ldap.ServerSearchResult{ResultCode: ldap.LDAPResultOperationsError}, fmt.Errorf("Search Error: error parsing filter: %s", req.Filter)
 	}
@@ -54,8 +53,7 @@ func (ds *DirectSearcher) Search(req *search.Request) (ldap.ServerSearchResult, 
 			"outpost_name": ds.si.GetOutpostName(),
 			"type":         "search",
 			"reason":       "empty_bind_dn",
-			"dn":           req.BindDN,
-			"client":       req.RemoteAddr(),
+			"app":          ds.si.GetAppSlug(),
 		}).Inc()
 		return ldap.ServerSearchResult{ResultCode: ldap.LDAPResultInsufficientAccessRights}, fmt.Errorf("Search Error: Anonymous BindDN not allowed %s", req.BindDN)
 	}
@@ -64,21 +62,19 @@ func (ds *DirectSearcher) Search(req *search.Request) (ldap.ServerSearchResult, 
 			"outpost_name": ds.si.GetOutpostName(),
 			"type":         "search",
 			"reason":       "invalid_bind_dn",
-			"dn":           req.BindDN,
-			"client":       req.RemoteAddr(),
+			"app":          ds.si.GetAppSlug(),
 		}).Inc()
 		return ldap.ServerSearchResult{ResultCode: ldap.LDAPResultInsufficientAccessRights}, fmt.Errorf("Search Error: BindDN %s not in our BaseDN %s", req.BindDN, ds.si.GetBaseDN())
 	}
 
-	flags, ok := ds.si.GetFlags(req.BindDN)
-	if !ok {
+	flags := ds.si.GetFlags(req.BindDN)
+	if flags == nil {
 		req.Log().Debug("User info not cached")
 		metrics.RequestsRejected.With(prometheus.Labels{
 			"outpost_name": ds.si.GetOutpostName(),
 			"type":         "search",
 			"reason":       "user_info_not_cached",
-			"dn":           req.BindDN,
-			"client":       req.RemoteAddr(),
+			"app":          ds.si.GetAppSlug(),
 		}).Inc()
 		return ldap.ServerSearchResult{ResultCode: ldap.LDAPResultInsufficientAccessRights}, errors.New("access denied")
 	}
@@ -90,8 +86,7 @@ func (ds *DirectSearcher) Search(req *search.Request) (ldap.ServerSearchResult, 
 			"outpost_name": ds.si.GetOutpostName(),
 			"type":         "search",
 			"reason":       "filter_parse_fail",
-			"dn":           req.BindDN,
-			"client":       req.RemoteAddr(),
+			"app":          ds.si.GetAppSlug(),
 		}).Inc()
 		return ldap.ServerSearchResult{ResultCode: ldap.LDAPResultOperationsError}, fmt.Errorf("Search Error: error parsing filter: %s", req.Filter)
 	}
@@ -149,7 +144,7 @@ func (ds *DirectSearcher) Search(req *search.Request) (ldap.ServerSearchResult, 
 						return fmt.Errorf("failed to get userinfo")
 					}
 
-					flags.UserInfo = &u
+					flags.UserInfo = u
 				}
 
 				u := make([]api.User, 1)

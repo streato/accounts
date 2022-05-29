@@ -11,18 +11,13 @@ from urllib.parse import quote_plus
 
 import structlog
 from celery.schedules import crontab
-from sentry_sdk import init as sentry_init
-from sentry_sdk.api import set_tag
-from sentry_sdk.integrations.celery import CeleryIntegration
-from sentry_sdk.integrations.django import DjangoIntegration
-from sentry_sdk.integrations.redis import RedisIntegration
-from sentry_sdk.integrations.threading import ThreadingIntegration
+from sentry_sdk import set_tag
 
-from authentik import ENV_GIT_HASH_KEY, __version__, get_build_hash
+from authentik import ENV_GIT_HASH_KEY, __version__
 from authentik.core.middleware import structlog_add_request_id
 from authentik.lib.config import CONFIG
 from authentik.lib.logging import add_process_id
-from authentik.lib.sentry import before_send
+from authentik.lib.sentry import sentry_init
 from authentik.lib.utils.reflection import get_env
 from authentik.stages.password import BACKEND_APP_PASSWORD, BACKEND_INBUILT, BACKEND_LDAP
 
@@ -152,7 +147,7 @@ SPECTACULAR_SETTINGS = {
         },
     ],
     "CONTACT": {
-        "email": "hello@beryju.org",
+        "email": "hello@goauthentik.io",
     },
     "AUTHENTICATION_WHITELIST": ["authentik.api.authentication.TokenAuthentication"],
     "LICENSE": {
@@ -221,7 +216,8 @@ CACHES = {
 DJANGO_REDIS_SCAN_ITERSIZE = 1000
 DJANGO_REDIS_IGNORE_EXCEPTIONS = True
 DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS = True
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+SESSION_SERIALIZER = "django.contrib.sessions.serializers.PickleSerializer"
 SESSION_CACHE_ALIAS = "default"
 # Configured via custom SessionMiddleware
 # SESSION_COOKIE_SAMESITE = "None"
@@ -357,34 +353,13 @@ CELERY_RESULT_BACKEND = (
 )
 
 # Sentry integration
-SENTRY_DSN = "https://a579bb09306d4f8b8d8847c052d3a1d3@sentry.beryju.org/8"
-
 env = get_env()
 _ERROR_REPORTING = CONFIG.y_bool("error_reporting.enabled", False)
 if _ERROR_REPORTING:
-    # pylint: disable=abstract-class-instantiated
-    sentry_init(
-        dsn=SENTRY_DSN,
-        integrations=[
-            DjangoIntegration(transaction_style="function_name"),
-            CeleryIntegration(),
-            RedisIntegration(),
-            ThreadingIntegration(propagate_hub=True),
-        ],
-        before_send=before_send,
-        release=f"authentik@{__version__}",
-        traces_sample_rate=float(CONFIG.y("error_reporting.sample_rate", 0.5)),
-        environment=CONFIG.y("error_reporting.environment", "customer"),
-        send_default_pii=CONFIG.y_bool("error_reporting.send_pii", False),
-    )
-    set_tag("authentik.build_hash", get_build_hash("tagged"))
-    set_tag("authentik.env", env)
-    set_tag("authentik.component", "backend")
+    sentry_env = CONFIG.y("error_reporting.environment", "customer")
+    sentry_init()
     set_tag("authentik.uuid", sha512(str(SECRET_KEY).encode("ascii")).hexdigest()[:16])
-    j_print(
-        "Error reporting is enabled",
-        env=CONFIG.y("error_reporting.environment", "customer"),
-    )
+
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
@@ -434,12 +409,12 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "plain": {
+        "json": {
             "()": structlog.stdlib.ProcessorFormatter,
             "processor": structlog.processors.JSONRenderer(sort_keys=True),
             "foreign_pre_chain": LOG_PRE_CHAIN,
         },
-        "colored": {
+        "console": {
             "()": structlog.stdlib.ProcessorFormatter,
             "processor": structlog.dev.ConsoleRenderer(colors=DEBUG),
             "foreign_pre_chain": LOG_PRE_CHAIN,
@@ -449,7 +424,7 @@ LOGGING = {
         "console": {
             "level": "DEBUG",
             "class": "logging.StreamHandler",
-            "formatter": "colored" if DEBUG else "plain",
+            "formatter": "console" if DEBUG else "json",
         },
     },
     "loggers": {},

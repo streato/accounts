@@ -13,7 +13,7 @@ msgstr ""
 "Language-Team: \n"
 "Plural-Forms: \n"
 
-#:
+#: 
 #~ msgid "#/identity/users/{0}"
 #~ msgstr ""
 
@@ -145,7 +145,7 @@ msgstr ""
 msgid "Access Key"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Access code validity"
 #~ msgstr ""
 
@@ -496,7 +496,7 @@ msgstr ""
 msgid "Audience"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Auth Type"
 #~ msgstr ""
 
@@ -539,7 +539,7 @@ msgstr ""
 msgid "Authorization"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Authorization Code"
 #~ msgstr ""
 
@@ -699,7 +699,7 @@ msgstr ""
 msgid "Build hash:"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Build hash: {0}"
 #~ msgstr ""
 
@@ -781,7 +781,7 @@ msgstr ""
 msgid "Certificate used to sign outgoing Responses going to the Service Provider."
 msgstr ""
 
-#:
+#: 
 #~ msgid "Certificate-Key Pair"
 #~ msgstr ""
 
@@ -872,7 +872,7 @@ msgstr ""
 msgid "Check the logs"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Check your Emails for a password reset link."
 #~ msgstr ""
 
@@ -932,6 +932,10 @@ msgstr ""
 
 #: src/pages/applications/ApplicationForm.ts
 msgid "Clear icon"
+msgstr ""
+
+#: src/elements/table/TablePage.ts
+msgid "Clear search"
 msgstr ""
 
 #: src/elements/forms/HorizontalFormElement.ts
@@ -1019,11 +1023,11 @@ msgstr ""
 msgid "Configuration stages"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Configure WebAuthn"
 #~ msgstr ""
 
-#:
+#: 
 #~ msgid "Configure how long access codes are valid for."
 #~ msgstr ""
 
@@ -1059,8 +1063,8 @@ msgstr ""
 msgid "Configure how the outpost queries the core authentik server's users."
 msgstr ""
 
-#:
-#:
+#: 
+#: 
 #~ msgid "Configure settings relevant to your user profile."
 #~ msgstr ""
 
@@ -1143,6 +1147,14 @@ msgstr ""
 msgid "Consumer secret"
 msgstr ""
 
+#: src/pages/flows/utils.ts
+msgid "Content left"
+msgstr ""
+
+#: src/pages/flows/utils.ts
+msgid "Content right"
+msgstr ""
+
 #: src/pages/events/EventInfo.ts
 #: src/pages/events/EventInfo.ts
 #: src/pages/events/EventInfo.ts
@@ -1182,7 +1194,7 @@ msgstr ""
 msgid "Copy"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Copy Key"
 #~ msgstr ""
 
@@ -1384,7 +1396,7 @@ msgstr ""
 msgid "Created by"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Created {0}"
 #~ msgstr ""
 
@@ -1394,7 +1406,7 @@ msgstr ""
 msgid "Creation Date"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Current plan cntext"
 #~ msgstr ""
 
@@ -1491,24 +1503,24 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Delete Authorization Code"
 #~ msgstr ""
 
-#:
-#:
+#: 
+#: 
 #~ msgid "Delete Binding"
 #~ msgstr ""
 
-#:
+#: 
 #~ msgid "Delete Consent"
 #~ msgstr ""
 
-#:
+#: 
 #~ msgid "Delete Refresh Code"
 #~ msgstr ""
 
-#:
+#: 
 #~ msgid "Delete Session"
 #~ msgstr ""
 
@@ -1541,6 +1553,11 @@ msgstr ""
 
 #: src/pages/stages/authenticator_validate/AuthenticatorValidateStageForm.ts
 msgid "Deny the user access"
+msgstr ""
+
+#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
+#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
+msgid "Deprecated. Instead of using this field, configure the JWKS data/URL in Sources."
 msgstr ""
 
 #: src/pages/applications/ApplicationForm.ts
@@ -1587,7 +1604,7 @@ msgstr ""
 msgid "Device classes which can be used to authenticate."
 msgstr ""
 
-#:
+#: 
 #~ msgid "Device name"
 #~ msgstr ""
 
@@ -1609,8 +1626,12 @@ msgid "Digits"
 msgstr ""
 
 #: src/pages/providers/ldap/LDAPProviderForm.ts
-msgid "Direct querying, always execute the configured bind flow to authenticate the user."
+msgid "Direct binding, always execute the configured bind flow to authenticate the user."
 msgstr ""
+
+#: src/pages/providers/ldap/LDAPProviderForm.ts
+#~ msgid "Direct querying, always execute the configured bind flow to authenticate the user."
+#~ msgstr ""
 
 #: src/pages/providers/ldap/LDAPProviderForm.ts
 msgid "Direct querying, always returns the latest data, but slower than cached querying."
@@ -1620,24 +1641,24 @@ msgstr ""
 msgid "Directory"
 msgstr ""
 
-#:
-#:
+#: 
+#: 
 #~ msgid "Disable"
 #~ msgstr ""
 
-#:
+#: 
 #~ msgid "Disable Duo authenticator"
 #~ msgstr ""
 
-#:
+#: 
 #~ msgid "Disable SMS authenticator"
 #~ msgstr ""
 
-#:
+#: 
 #~ msgid "Disable Static Tokens"
 #~ msgstr ""
 
-#:
+#: 
 #~ msgid "Disable Time-based OTP"
 #~ msgstr ""
 
@@ -1691,7 +1712,7 @@ msgstr ""
 msgid "Dummy stage used for testing. Shows a simple continue button and always passes."
 msgstr ""
 
-#:
+#: 
 #~ msgid "Duo"
 #~ msgstr ""
 
@@ -1802,16 +1823,16 @@ msgstr ""
 msgid "Embedded outpost is not configured correctly."
 msgstr ""
 
-#:
-#:
+#: 
+#: 
 #~ msgid "Enable"
 #~ msgstr ""
 
-#:
+#: 
 #~ msgid "Enable Duo authenticator"
 #~ msgstr ""
 
-#:
+#: 
 #~ msgid "Enable SMS authenticator"
 #~ msgstr ""
 
@@ -1819,11 +1840,11 @@ msgstr ""
 msgid "Enable StartTLS"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Enable Static Tokens"
 #~ msgstr ""
 
-#:
+#: 
 #~ msgid "Enable TOTP"
 #~ msgstr ""
 
@@ -1887,7 +1908,7 @@ msgstr ""
 msgid "Error: unsupported source settings: {0}"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Error: unsupported stage settings: {0}"
 #~ msgstr ""
 
@@ -1942,7 +1963,7 @@ msgstr ""
 msgid "Exception"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Execute"
 #~ msgstr ""
 
@@ -1954,7 +1975,7 @@ msgstr ""
 msgid "Execute flow"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Execute with inspector"
 #~ msgstr ""
 
@@ -2095,6 +2116,11 @@ msgstr ""
 msgid "Failed to delete {0}: {1}"
 msgstr ""
 
+#: src/user/user-settings/sources/SourceSettingsOAuth.ts
+#: src/user/user-settings/sources/SourceSettingsPlex.ts
+msgid "Failed to disconnected source: {exc}"
+msgstr ""
+
 #: src/pages/users/UserActiveForm.ts
 msgid "Failed to update {0}: {1}"
 msgstr ""
@@ -2129,7 +2155,7 @@ msgstr ""
 msgid "Field which contains a unique Identifier."
 msgstr ""
 
-#:
+#: 
 #~ msgid "Field which contains members of a group."
 #~ msgstr ""
 
@@ -2336,7 +2362,7 @@ msgstr ""
 msgid "Get this value from https://console.twilio.com"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Go to admin interface"
 #~ msgstr ""
 
@@ -2348,7 +2374,7 @@ msgstr ""
 msgid "Go to previous page"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Go to user interface"
 #~ msgstr ""
 
@@ -2459,6 +2485,7 @@ msgstr ""
 
 #: src/pages/events/RuleForm.ts
 #: src/pages/outposts/OutpostForm.ts
+#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/proxy/ProxyProviderForm.ts
@@ -2693,7 +2720,7 @@ msgstr ""
 msgid "Invalidation flow"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Invitation"
 #~ msgstr ""
 
@@ -2729,10 +2756,15 @@ msgstr ""
 msgid "Issuer mode"
 msgstr ""
 
+#: src/pages/sources/oauth/OAuthSourceForm.ts
+msgid "JSON Web Key URL. Keys from the URL will be used to validate JWTs from this source."
+msgstr ""
+
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #~ msgid "JWT Algorithm"
 #~ msgstr ""
 
+#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 msgid "JWTs signed by certificates configured here can be used to authenticate to the provider."
 msgstr ""
@@ -2753,13 +2785,14 @@ msgstr ""
 msgid "Kubeconfig"
 msgstr ""
 
+#: src/pages/outposts/OutpostForm.ts
 #: src/pages/outposts/OutpostListPage.ts
 msgid "LDAP"
 msgstr ""
 
 #: src/pages/outposts/OutpostForm.ts
-msgid "LDAP (Technical preview)"
-msgstr ""
+#~ msgid "LDAP (Technical preview)"
+#~ msgstr ""
 
 #: src/pages/sources/ldap/LDAPSourceForm.ts
 msgid "LDAP Attribute mapping"
@@ -2824,11 +2857,15 @@ msgstr ""
 msgid "Launch URL"
 msgstr ""
 
+#: src/pages/flows/FlowForm.ts
+msgid "Layout"
+msgstr ""
+
 #: src/pages/stages/identification/IdentificationStageForm.ts
 msgid "Let the user identify themselves with their username or Email address."
 msgstr ""
 
-#:
+#: 
 #~ msgid "Library"
 #~ msgstr ""
 
@@ -2858,6 +2895,7 @@ msgstr ""
 #: src/elements/table/Table.ts
 #: src/flows/FlowExecutor.ts
 #: src/flows/FlowExecutor.ts
+#: src/flows/FlowExecutor.ts
 #: src/flows/FlowInspector.ts
 #: src/flows/stages/access_denied/AccessDeniedStage.ts
 #: src/flows/stages/authenticator_duo/AuthenticatorDuoStage.ts
@@ -2877,6 +2915,7 @@ msgstr ""
 #: src/flows/stages/prompt/PromptStage.ts
 #: src/pages/applications/ApplicationViewPage.ts
 #: src/pages/applications/ApplicationViewPage.ts
+#: src/user/user-settings/details/UserSettingsFlowExecutor.ts
 #: src/user/user-settings/details/UserSettingsFlowExecutor.ts
 #: src/user/user-settings/details/stages/prompt/PromptStage.ts
 #: src/user/user-settings/mfa/MFADevicesPage.ts
@@ -2907,6 +2946,7 @@ msgstr ""
 #: src/pages/providers/ldap/LDAPProviderForm.ts
 #: src/pages/providers/ldap/LDAPProviderForm.ts
 #: src/pages/providers/ldap/LDAPProviderForm.ts
+#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
@@ -3033,6 +3073,10 @@ msgstr ""
 msgid "MFA Devices"
 msgstr ""
 
+#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
+msgid "Machine-to-Machine authentication settings"
+msgstr ""
+
 #: src/flows/stages/authenticator_static/AuthenticatorStaticStage.ts
 msgid "Make sure to keep these tokens in a safe place."
 msgstr ""
@@ -3138,7 +3182,7 @@ msgstr ""
 msgid "Model updated"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Monitor"
 #~ msgstr ""
 
@@ -3379,6 +3423,7 @@ msgid "No matching events could be found."
 msgstr ""
 
 #: src/elements/table/Table.ts
+#: src/elements/table/TablePage.ts
 msgid "No objects found."
 msgstr ""
 
@@ -3473,7 +3518,7 @@ msgstr ""
 msgid "Notification Transports"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Notification rule"
 #~ msgstr ""
 
@@ -3493,7 +3538,7 @@ msgstr ""
 msgid "Notifications"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Notifications Transport"
 #~ msgstr ""
 
@@ -3520,6 +3565,22 @@ msgstr ""
 #: src/pages/providers/ProviderWizard.ts
 #~ msgid "OAuth/OIDC"
 #~ msgstr ""
+
+#: src/pages/sources/oauth/OAuthSourceForm.ts
+msgid "OIDC JWKS"
+msgstr ""
+
+#: src/pages/sources/oauth/OAuthSourceForm.ts
+msgid "OIDC JWKS URL"
+msgstr ""
+
+#: src/pages/sources/oauth/OAuthSourceForm.ts
+msgid "OIDC Well-known URL"
+msgstr ""
+
+#: src/pages/sources/oauth/OAuthSourceForm.ts
+msgid "OIDC well-known configuration URL. Can be used to automatically configure the URLs above."
+msgstr ""
 
 #: src/pages/admin-overview/cards/SystemStatusCard.ts
 msgid "OK"
@@ -3568,7 +3629,7 @@ msgstr ""
 msgid "Open API Browser"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Open application"
 #~ msgstr ""
 
@@ -3650,7 +3711,7 @@ msgstr ""
 msgid "Outdated outposts"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Outpost"
 #~ msgstr ""
 
@@ -3662,11 +3723,11 @@ msgstr ""
 msgid "Outpost Integrations"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Outpost Service-connection"
 #~ msgstr ""
 
-#:
+#: 
 #~ msgid "Outpost integration"
 #~ msgstr ""
 
@@ -3764,7 +3825,7 @@ msgstr ""
 msgid "Password stage"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Password, 2FA, etc"
 #~ msgstr ""
 
@@ -3840,7 +3901,7 @@ msgstr ""
 msgid "Policy Bindings"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Policy binding"
 #~ msgstr ""
 
@@ -3928,7 +3989,7 @@ msgstr ""
 msgid "Profile URL"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Prompt"
 #~ msgstr ""
 
@@ -3945,7 +4006,7 @@ msgstr ""
 msgid "Prompts"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Property Mapping"
 #~ msgstr ""
 
@@ -4004,7 +4065,7 @@ msgstr ""
 msgid "Provider Type"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Provider type"
 #~ msgstr ""
 
@@ -4089,6 +4150,10 @@ msgstr ""
 msgid "RSA-SHA512"
 msgstr ""
 
+#: src/pages/sources/oauth/OAuthSourceForm.ts
+msgid "Raw JWKS data."
+msgstr ""
+
 #: src/pages/sources/plex/PlexSourceForm.ts
 msgid "Re-authenticate with plex"
 msgstr ""
@@ -4136,7 +4201,11 @@ msgid "Redirect URIs"
 msgstr ""
 
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
-msgid "Redirect URIs/Origins"
+#~ msgid "Redirect URIs/Origins"
+#~ msgstr ""
+
+#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
+msgid "Redirect URIs/Origins (RegEx)"
 msgstr ""
 
 #: src/pages/sources/saml/SAMLSourceForm.ts
@@ -4147,7 +4216,7 @@ msgstr ""
 msgid "Refresh"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Refresh Code"
 #~ msgstr ""
 
@@ -4265,7 +4334,7 @@ msgstr ""
 msgid "Retry"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Retry Task"
 #~ msgstr ""
 
@@ -4433,7 +4502,7 @@ msgstr ""
 msgid "Secret was rotated"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Secret was rotation"
 #~ msgstr ""
 
@@ -4473,7 +4542,7 @@ msgstr ""
 msgid "Select an enrollment flow"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Select an identification method."
 #~ msgstr ""
 
@@ -4522,7 +4591,7 @@ msgstr ""
 msgid "Selected policies are executed when the stage is submitted to validate the data."
 msgstr ""
 
-#:
+#: 
 #~ msgid "Selecting a service-connection enables the management of the outpost by authentik."
 #~ msgstr ""
 
@@ -4573,7 +4642,7 @@ msgstr ""
 msgid "Server and client are further than 5 seconds apart."
 msgstr ""
 
-#:
+#: 
 #~ msgid "Server name for which this provider's certificate is valid for."
 #~ msgstr ""
 
@@ -4581,7 +4650,7 @@ msgstr ""
 msgid "Server validation of credential failed: {err}"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Service Connections"
 #~ msgstr ""
 
@@ -4589,12 +4658,12 @@ msgstr ""
 msgid "Service Provider Binding"
 msgstr ""
 
-#:
-#:
+#: 
+#: 
 #~ msgid "Service connection"
 #~ msgstr ""
 
-#:
+#: 
 #~ msgid "Session"
 #~ msgstr ""
 
@@ -4649,6 +4718,7 @@ msgstr ""
 
 #: src/pages/users/RelatedUserList.ts
 #: src/pages/users/UserListPage.ts
+#: src/pages/users/UserViewPage.ts
 msgid "Set password"
 msgstr ""
 
@@ -4687,6 +4757,14 @@ msgstr ""
 
 #: src/pages/flows/FlowForm.ts
 msgid "Shown as the Title in Flow pages."
+msgstr ""
+
+#: src/pages/flows/utils.ts
+msgid "Sidebar left"
+msgstr ""
+
+#: src/pages/flows/utils.ts
+msgid "Sidebar right"
 msgstr ""
 
 #: src/flows/stages/identification/IdentificationStage.ts
@@ -4736,7 +4814,7 @@ msgstr ""
 msgid "Something went wrong! Please try again later."
 msgstr ""
 
-#:
+#: 
 #~ msgid "Source"
 #~ msgstr ""
 
@@ -4744,7 +4822,7 @@ msgstr ""
 msgid "Source linked"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Source name"
 #~ msgstr ""
 
@@ -4761,7 +4839,7 @@ msgstr ""
 msgid "Sources"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Sources of identities, which can either be synced into authentik's database, like LDAP, or can be used by users to authenticate and enroll themselves, like OAuth and social logins"
 #~ msgstr ""
 
@@ -4777,6 +4855,10 @@ msgstr ""
 msgid "Specify multiple server URIs by separating them with a comma."
 msgstr ""
 
+#: src/pages/flows/utils.ts
+msgid "Stacked"
+msgstr ""
+
 #: src/pages/flows/BoundStagesList.ts
 #: src/pages/flows/StageBindingForm.ts
 msgid "Stage"
@@ -4790,7 +4872,7 @@ msgstr ""
 msgid "Stage Configuration"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Stage binding"
 #~ msgstr ""
 
@@ -4911,17 +4993,17 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#:
-#:
-#:
-#:
+#: 
+#: 
+#: 
+#: 
 #~ msgid "Status: Disabled"
 #~ msgstr ""
 
-#:
-#:
-#:
-#:
+#: 
+#: 
+#: 
+#: 
 #~ msgid "Status: Enabled"
 #~ msgstr ""
 
@@ -5033,8 +5115,8 @@ msgstr ""
 msgid "Successfully created rule."
 msgstr ""
 
-#:
-#:
+#: 
+#: 
 #~ msgid "Successfully created service-connection."
 #~ msgstr ""
 
@@ -5088,6 +5170,11 @@ msgstr ""
 #: src/elements/forms/DeleteBulkForm.ts
 #: src/elements/forms/DeleteForm.ts
 msgid "Successfully deleted {0} {1}"
+msgstr ""
+
+#: src/user/user-settings/sources/SourceSettingsOAuth.ts
+#: src/user/user-settings/sources/SourceSettingsPlex.ts
+msgid "Successfully disconnected source"
 msgstr ""
 
 #: src/pages/crypto/CertificateGenerateForm.ts
@@ -5200,8 +5287,8 @@ msgstr ""
 msgid "Successfully updated rule."
 msgstr ""
 
-#:
-#:
+#: 
+#: 
 #~ msgid "Successfully updated service-connection."
 #~ msgstr ""
 
@@ -5284,7 +5371,7 @@ msgstr ""
 msgid "Symbol charset"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Sync"
 #~ msgstr ""
 
@@ -5292,7 +5379,7 @@ msgstr ""
 msgid "Sync groups"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Sync parent group"
 #~ msgstr ""
 
@@ -5337,7 +5424,7 @@ msgstr ""
 msgid "TLS Authentication Certificate/SSH Keypair"
 msgstr ""
 
-#:
+#: 
 #~ msgid "TLS Server name"
 #~ msgstr ""
 
@@ -5450,7 +5537,7 @@ msgstr ""
 msgid "The following keywords are supported:"
 msgstr ""
 
-#:
+#: 
 #~ msgid "The following objects use {0}:"
 #~ msgstr ""
 
@@ -5558,7 +5645,7 @@ msgstr ""
 #~ msgid "Time offset when temporary users should be deleted. This only applies if your IDP uses the NameID Format 'transient', and the user doesn't log out manually. (Format: hours=1;minutes=2;seconds=3)."
 #~ msgstr ""
 
-#:
+#: 
 #~ msgid "Time-based One-Time Passwords"
 #~ msgstr ""
 
@@ -5578,7 +5665,11 @@ msgid "To"
 msgstr ""
 
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
-msgid "To allow any redirect URI, set this value to \"*\". Be aware of the possible security implications this can have."
+#~ msgid "To allow any redirect URI, set this value to \"*\". Be aware of the possible security implications this can have."
+#~ msgstr ""
+
+#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
+msgid "To allow any redirect URI, set this value to \".*\". Be aware of the possible security implications this can have."
 msgstr ""
 
 #: src/pages/users/UserViewPage.ts
@@ -5598,8 +5689,8 @@ msgstr ""
 msgid "To use SSL instead, use 'ldaps://' and disable this option."
 msgstr ""
 
-#:
-#:
+#: 
+#: 
 #~ msgid "Token"
 #~ msgstr ""
 
@@ -5688,6 +5779,10 @@ msgstr ""
 
 #: src/pages/events/RuleForm.ts
 msgid "Transports"
+msgstr ""
+
+#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
+msgid "Trusted OIDC Sources"
 msgstr ""
 
 #: src/interfaces/locale.ts
@@ -5799,7 +5894,7 @@ msgstr ""
 msgid "Unknown"
 msgstr ""
 
-#:
+#: 
 #~ msgid "Unmanaged"
 #~ msgstr ""
 
@@ -5972,6 +6067,8 @@ msgstr ""
 #: src/pages/users/RelatedUserList.ts
 #: src/pages/users/UserListPage.ts
 #: src/pages/users/UserListPage.ts
+#: src/pages/users/UserViewPage.ts
+#: src/pages/users/UserViewPage.ts
 msgid "Update password"
 msgstr ""
 
@@ -6076,8 +6173,8 @@ msgstr ""
 #~ msgid "User Reputation"
 #~ msgstr ""
 
-#:
-#:
+#: 
+#: 
 #~ msgid "User Settings"
 #~ msgstr ""
 
@@ -6361,7 +6458,7 @@ msgstr ""
 msgid "WebAuthn Authenticators"
 msgstr ""
 
-#:
+#: 
 #~ msgid "WebAuthn Devices"
 #~ msgstr ""
 
@@ -6514,11 +6611,11 @@ msgstr ""
 msgid "app1 running on app1.example.com"
 msgstr ""
 
-#:
+#: 
 #~ msgid "authentik Builtin Database"
 #~ msgstr ""
 
-#:
+#: 
 #~ msgid "authentik LDAP Backend"
 #~ msgstr ""
 

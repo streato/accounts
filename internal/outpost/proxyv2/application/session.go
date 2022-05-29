@@ -3,6 +3,7 @@ package application
 import (
 	"fmt"
 	"math"
+	"net/url"
 	"os"
 	"strconv"
 
@@ -12,7 +13,7 @@ import (
 	"gopkg.in/boj/redistore.v1"
 )
 
-func (a *Application) getStore(p api.ProxyOutpostConfig) sessions.Store {
+func (a *Application) getStore(p api.ProxyOutpostConfig, externalHost *url.URL) sessions.Store {
 	var store sessions.Store
 	if config.G.Redis.Host != "" {
 		rs, err := redistore.NewRediStoreWithDB(10, "tcp", fmt.Sprintf("%s:%d", config.G.Redis.Host, config.G.Redis.Port), config.G.Redis.Password, strconv.Itoa(config.G.Redis.OutpostSessionDB), []byte(*p.CookieSecret))
@@ -28,7 +29,7 @@ func (a *Application) getStore(p api.ProxyOutpostConfig) sessions.Store {
 			rs.SetMaxAge(0)
 		}
 		rs.Options.Domain = *p.CookieDomain
-		a.log.Debug("using redis session backend")
+		a.log.Trace("using redis session backend")
 		store = rs
 	} else {
 		dir := os.TempDir()
@@ -48,7 +49,7 @@ func (a *Application) getStore(p api.ProxyOutpostConfig) sessions.Store {
 			cs.MaxAge(0)
 		}
 		cs.Options.Domain = *p.CookieDomain
-		a.log.WithField("dir", dir).Debug("using filesystem session backend")
+		a.log.WithField("dir", dir).Trace("using filesystem session backend")
 		store = cs
 	}
 	return store

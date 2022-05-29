@@ -41,7 +41,7 @@ func TestForwardHandleNginx_Single_Headers(t *testing.T) {
 
 	assert.Equal(t, rr.Code, http.StatusUnauthorized)
 
-	s, _ := a.sessions.Get(req, constants.SeesionName)
+	s, _ := a.sessions.Get(req, constants.SessionName)
 	assert.Equal(t, "http://test.goauthentik.io/app", s.Values[constants.SessionRedirect])
 }
 
@@ -55,7 +55,7 @@ func TestForwardHandleNginx_Single_URI(t *testing.T) {
 
 	assert.Equal(t, rr.Code, http.StatusUnauthorized)
 
-	s, _ := a.sessions.Get(req, constants.SeesionName)
+	s, _ := a.sessions.Get(req, constants.SessionName)
 	assert.Equal(t, "/app", s.Values[constants.SessionRedirect])
 }
 
@@ -67,7 +67,7 @@ func TestForwardHandleNginx_Single_Claims(t *testing.T) {
 	rr := httptest.NewRecorder()
 	a.forwardHandleNginx(rr, req)
 
-	s, _ := a.sessions.Get(req, constants.SeesionName)
+	s, _ := a.sessions.Get(req, constants.SessionName)
 	s.Values[constants.SessionClaims] = Claims{
 		Sub: "foo",
 		Proxy: &ProxyClaims{
@@ -106,7 +106,7 @@ func TestForwardHandleNginx_Single_Claims(t *testing.T) {
 
 func TestForwardHandleNginx_Domain_Blank(t *testing.T) {
 	a := newTestApplication()
-	a.proxyConfig.Mode = api.PROXYMODE_FORWARD_DOMAIN.Ptr()
+	a.proxyConfig.Mode = *api.NewNullableProxyMode(api.PROXYMODE_FORWARD_DOMAIN.Ptr())
 	a.proxyConfig.CookieDomain = api.PtrString("foo")
 	req, _ := http.NewRequest("GET", "/outpost.goauthentik.io/auth/nginx", nil)
 
@@ -118,7 +118,7 @@ func TestForwardHandleNginx_Domain_Blank(t *testing.T) {
 
 func TestForwardHandleNginx_Domain_Header(t *testing.T) {
 	a := newTestApplication()
-	a.proxyConfig.Mode = api.PROXYMODE_FORWARD_DOMAIN.Ptr()
+	a.proxyConfig.Mode = *api.NewNullableProxyMode(api.PROXYMODE_FORWARD_DOMAIN.Ptr())
 	a.proxyConfig.CookieDomain = api.PtrString("foo")
 	a.proxyConfig.ExternalHost = "http://auth.test.goauthentik.io"
 	req, _ := http.NewRequest("GET", "/outpost.goauthentik.io/auth/nginx", nil)
@@ -129,6 +129,6 @@ func TestForwardHandleNginx_Domain_Header(t *testing.T) {
 
 	assert.Equal(t, http.StatusUnauthorized, rr.Code)
 
-	s, _ := a.sessions.Get(req, constants.SeesionName)
+	s, _ := a.sessions.Get(req, constants.SessionName)
 	assert.Equal(t, "http://test.goauthentik.io/app", s.Values[constants.SessionRedirect])
 }

@@ -481,6 +481,7 @@ class NotificationRule(PolicyBindingModel):
                 "selected, the notification will only be shown in the authentik UI."
             )
         ),
+        blank=True,
     )
     severity = models.TextField(
         choices=NotificationSeverity.choices,
@@ -518,7 +519,7 @@ class NotificationWebhookMapping(PropertyMapping):
 
     @property
     def serializer(self) -> type["Serializer"]:
-        from authentik.events.api.notification_mapping import NotificationWebhookMappingSerializer
+        from authentik.events.api.notification_mappings import NotificationWebhookMappingSerializer
 
         return NotificationWebhookMappingSerializer
 
