@@ -152,7 +152,7 @@ SPECTACULAR_SETTINGS = {
     "AUTHENTICATION_WHITELIST": ["authentik.api.authentication.TokenAuthentication"],
     "LICENSE": {
         "name": "GNU GPLv3",
-        "url": "https://github.com/goauthentik/authentik/blob/master/LICENSE",
+        "url": "https://github.com/goauthentik/authentik/blob/main/LICENSE",
     },
     "ENUM_NAME_OVERRIDES": {
         "EventActions": "authentik.events.models.EventAction",
@@ -216,14 +216,13 @@ CACHES = {
 DJANGO_REDIS_SCAN_ITERSIZE = 1000
 DJANGO_REDIS_IGNORE_EXCEPTIONS = True
 DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS = True
-SESSION_ENGINE = "django.contrib.sessions.backends.cached_db"
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_SERIALIZER = "django.contrib.sessions.serializers.PickleSerializer"
 SESSION_CACHE_ALIAS = "default"
 # Configured via custom SessionMiddleware
 # SESSION_COOKIE_SAMESITE = "None"
 # SESSION_COOKIE_SECURE = True
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_SAVE_EVERY_REQUEST = True
 
 MESSAGE_STORAGE = "authentik.root.messages.storage.ChannelsStorage"
 

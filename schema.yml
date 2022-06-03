@@ -7,7 +7,7 @@ info:
     email: hello@goauthentik.io
   license:
     name: GNU GPLv3
-    url: https://github.com/goauthentik/authentik/blob/master/LICENSE
+    url: https://github.com/goauthentik/authentik/blob/main/LICENSE
 paths:
   /admin/apps/:
     get:
@@ -4490,6 +4490,7 @@ paths:
           type: string
           enum:
           - email
+          - local
           - webhook
           - webhook_slack
       - in: query
@@ -14435,6 +14436,10 @@ paths:
         schema:
           type: string
           format: uuid
+      - in: query
+        name: verify_only
+        schema:
+          type: boolean
       tags:
       - stages
       security:
@@ -19607,6 +19612,11 @@ components:
           type: string
         auth_type:
           $ref: '#/components/schemas/AuthTypeEnum'
+        verify_only:
+          type: boolean
+          description: When enabled, the Phone number is only used during enrollment
+            to verify the users authenticity. Only a hash of the phone number is saved
+            to ensure it is not re-used in the future.
       required:
       - account_sid
       - auth
@@ -19650,6 +19660,11 @@ components:
           type: string
         auth_type:
           $ref: '#/components/schemas/AuthTypeEnum'
+        verify_only:
+          type: boolean
+          description: When enabled, the Phone number is only used during enrollment
+            to verify the users authenticity. Only a hash of the phone number is saved
+            to ensure it is not re-used in the future.
       required:
       - account_sid
       - auth
@@ -23041,12 +23056,12 @@ components:
           description: Only send notification once, for example when sending a webhook
             into a chat channel.
       required:
-      - mode
       - mode_verbose
       - name
       - pk
     NotificationTransportModeEnum:
       enum:
+      - local
       - webhook
       - webhook_slack
       - email
@@ -23072,7 +23087,6 @@ components:
           description: Only send notification once, for example when sending a webhook
             into a chat channel.
       required:
-      - mode
       - name
     NotificationTransportTest:
       type: object
@@ -26802,6 +26816,11 @@ components:
           type: string
         auth_type:
           $ref: '#/components/schemas/AuthTypeEnum'
+        verify_only:
+          type: boolean
+          description: When enabled, the Phone number is only used during enrollment
+            to verify the users authenticity. Only a hash of the phone number is saved
+            to ensure it is not re-used in the future.
     PatchedAuthenticatorStaticStageRequest:
       type: object
       description: AuthenticatorStaticStage Serializer

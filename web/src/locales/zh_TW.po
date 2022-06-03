@@ -2403,6 +2403,10 @@ msgstr "HTTP-Basic 用户名密钥"
 msgid "HTTPS is not detected correctly"
 msgstr "未正确检测到 HTTPS"
 
+#: src/pages/stages/authenticator_sms/AuthenticatorSMSStageForm.ts
+msgid "Hash phone number"
+msgstr ""
+
 #~ msgid "Have I been pwned"
 #~ msgstr "Have I been pwned"
 
@@ -2510,6 +2514,10 @@ msgstr "标识符"
 
 #: src/pages/stages/authenticator_validate/AuthenticatorValidateStageForm.ts
 msgid "If any of the devices user of the types selected above have been used within this duration, this stage will be skipped."
+msgstr ""
+
+#: src/pages/stages/authenticator_sms/AuthenticatorSMSStageForm.ts
+msgid "If enabled, only a hash of the phone number will be saved. This can be done for data-protection reasons.Devices created from a stage with this enabled cannot be used with the authenticator validation stage."
 msgstr ""
 
 #: src/pages/outposts/ServiceConnectionDockerForm.ts
@@ -2952,6 +2960,10 @@ msgstr "载入中……"
 #: src/pages/outposts/ServiceConnectionListPage.ts
 msgid "Local"
 msgstr "本地"
+
+#: src/pages/events/TransportForm.ts
+msgid "Local (notifications will be created within authentik)"
+msgstr ""
 
 #~ msgid "Locale"
 #~ msgstr "区域设置"
@@ -6234,6 +6246,10 @@ msgstr "验证证书"
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 msgid "Verification certificates"
 msgstr "验证证书"
+
+#: src/pages/stages/authenticator_sms/AuthenticatorSMSStageForm.ts
+#~ msgid "Verify only"
+#~ msgstr ""
 
 #: src/pages/stages/email/EmailStageForm.ts
 msgid "Verify the user's email address by sending them a one-time-link. Can also be used for recovery to verify the user's authenticity."
