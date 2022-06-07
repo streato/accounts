@@ -49,6 +49,7 @@ msgstr "(Biçim: saat=1; dakika=2; saniye= 3)."
 #: src/pages/providers/oauth2/OAuth2ProviderViewPage.ts
 #: src/pages/providers/oauth2/OAuth2ProviderViewPage.ts
 #: src/pages/providers/oauth2/OAuth2ProviderViewPage.ts
+#: src/pages/providers/oauth2/OAuth2ProviderViewPage.ts
 #: src/pages/stages/invitation/InvitationListPage.ts
 #: src/pages/tokens/TokenListPage.ts
 #: src/pages/users/RelatedUserList.ts
@@ -2091,6 +2092,10 @@ msgstr "{0} silinemedi: {1}"
 msgid "Failed to disconnected source: {exc}"
 msgstr ""
 
+#: src/elements/table/Table.ts
+msgid "Failed to fetch objects."
+msgstr ""
+
 #: src/pages/users/UserActiveForm.ts
 msgid "Failed to update {0}: {1}"
 msgstr "{0} güncellenemedi: {1}"
@@ -2527,6 +2532,10 @@ msgstr "Tanımlayıcı"
 msgid "If any of the devices user of the types selected above have been used within this duration, this stage will be skipped."
 msgstr ""
 
+#: src/pages/applications/ApplicationForm.ts
+msgid "If checked, the launch URL will open in a new browser tab or window from the user's application library."
+msgstr ""
+
 #: src/pages/stages/authenticator_sms/AuthenticatorSMSStageForm.ts
 msgid "If enabled, only a hash of the phone number will be saved. This can be done for data-protection reasons.Devices created from a stage with this enabled cannot be used with the authenticator validation stage."
 msgstr ""
@@ -2729,6 +2738,10 @@ msgstr "Yayımcı kipi"
 
 #: src/pages/sources/oauth/OAuthSourceForm.ts
 msgid "JSON Web Key URL. Keys from the URL will be used to validate JWTs from this source."
+msgstr ""
+
+#: src/pages/providers/oauth2/OAuth2ProviderViewPage.ts
+msgid "JWKS URL"
 msgstr ""
 
 #~ msgid "JWT Algorithm"
@@ -3598,6 +3611,10 @@ msgstr "API Tarayıcısını aç"
 
 #~ msgid "Open application"
 #~ msgstr "Uygulamayı aç"
+
+#: src/pages/applications/ApplicationForm.ts
+msgid "Open in new tab"
+msgstr ""
 
 #: src/pages/events/EventInfo.ts
 msgid "Open issue on GitHub..."

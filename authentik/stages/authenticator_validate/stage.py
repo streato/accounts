@@ -85,9 +85,7 @@ class AuthenticatorValidationChallengeResponse(ChallengeResponse):
     def validate_code(self, code: str) -> str:
         """Validate code-based response, raise error if code isn't allowed"""
         self._challenge_allowed([DeviceClasses.TOTP, DeviceClasses.STATIC, DeviceClasses.SMS])
-        self.device = validate_challenge_code(
-            code, self.stage.request, self.stage.get_pending_user()
-        )
+        self.device = validate_challenge_code(code, self.stage, self.stage.get_pending_user())
         return code
 
     def validate_webauthn(self, webauthn: dict) -> dict:
@@ -95,14 +93,14 @@ class AuthenticatorValidationChallengeResponse(ChallengeResponse):
         or response is invalid"""
         self._challenge_allowed([DeviceClasses.WEBAUTHN])
         self.device = validate_challenge_webauthn(
-            webauthn, self.stage.request, self.stage.get_pending_user()
+            webauthn, self.stage, self.stage.get_pending_user()
         )
         return webauthn
 
     def validate_duo(self, duo: int) -> int:
         """Initiate Duo authentication"""
         self._challenge_allowed([DeviceClasses.DUO])
-        self.device = validate_challenge_duo(duo, self.stage.request, self.stage.get_pending_user())
+        self.device = validate_challenge_duo(duo, self.stage, self.stage.get_pending_user())
         return duo
 
     def validate_selected_challenge(self, challenge: dict) -> dict:
@@ -376,9 +374,9 @@ class AuthenticatorValidateStageView(ChallengeStageView):
         # All validation is done by the serializer
         user = self.executor.plan.context.get(PLAN_CONTEXT_PENDING_USER)
         if not user:
-            webauthn_device: WebAuthnDevice = response.data.get("webauthn", None)
-            if not webauthn_device:
-                return self.executor.stage_ok()
+            if "webauthn" not in response.data:
+                return self.executor.stage_invalid()
+            webauthn_device: WebAuthnDevice = response.device
             self.logger.debug("Set user from user-less flow", user=webauthn_device.user)
             self.executor.plan.context[PLAN_CONTEXT_PENDING_USER] = webauthn_device.user
             self.executor.plan.context[PLAN_CONTEXT_METHOD] = "auth_webauthn_pwl"

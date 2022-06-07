@@ -52,6 +52,7 @@ msgstr ""
 #: src/pages/providers/oauth2/OAuth2ProviderViewPage.ts
 #: src/pages/providers/oauth2/OAuth2ProviderViewPage.ts
 #: src/pages/providers/oauth2/OAuth2ProviderViewPage.ts
+#: src/pages/providers/oauth2/OAuth2ProviderViewPage.ts
 #: src/pages/stages/invitation/InvitationListPage.ts
 #: src/pages/tokens/TokenListPage.ts
 #: src/pages/users/RelatedUserList.ts
@@ -2116,6 +2117,10 @@ msgstr "Impossible de supprimer {0} : {1}"
 msgid "Failed to disconnected source: {exc}"
 msgstr ""
 
+#: src/elements/table/Table.ts
+msgid "Failed to fetch objects."
+msgstr ""
+
 #: src/pages/users/UserActiveForm.ts
 msgid "Failed to update {0}: {1}"
 msgstr "Impossible de mettre à jour {0} : {1}"
@@ -2556,6 +2561,10 @@ msgstr "Identifiant"
 msgid "If any of the devices user of the types selected above have been used within this duration, this stage will be skipped."
 msgstr ""
 
+#: src/pages/applications/ApplicationForm.ts
+msgid "If checked, the launch URL will open in a new browser tab or window from the user's application library."
+msgstr ""
+
 #: src/pages/stages/authenticator_sms/AuthenticatorSMSStageForm.ts
 msgid "If enabled, only a hash of the phone number will be saved. This can be done for data-protection reasons.Devices created from a stage with this enabled cannot be used with the authenticator validation stage."
 msgstr ""
@@ -2757,6 +2766,10 @@ msgstr "Mode de l'émetteur"
 
 #: src/pages/sources/oauth/OAuthSourceForm.ts
 msgid "JSON Web Key URL. Keys from the URL will be used to validate JWTs from this source."
+msgstr ""
+
+#: src/pages/providers/oauth2/OAuth2ProviderViewPage.ts
+msgid "JWKS URL"
 msgstr ""
 
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
@@ -3630,6 +3643,10 @@ msgstr ""
 
 #~ msgid "Open application"
 #~ msgstr "Ouvrir l'appication"
+
+#: src/pages/applications/ApplicationForm.ts
+msgid "Open in new tab"
+msgstr ""
 
 #: src/pages/events/EventInfo.ts
 msgid "Open issue on GitHub..."

@@ -55,7 +55,7 @@ i18n-extract-core:
 	./manage.py makemessages --ignore web --ignore internal --ignore web --ignore web-api --ignore website -l en
 
 gen-build:
-	./manage.py spectacular --file schema.yml
+	AUTHENTIK_DEBUG=true ./manage.py spectacular --file schema.yml
 
 gen-clean:
 	rm -rf web/api/src/
@@ -102,6 +102,9 @@ run:
 #########################
 ## Web
 #########################
+
+web-build: web-install
+	cd web && npm run build
 
 web: web-lint-fix web-lint web-extract
 
