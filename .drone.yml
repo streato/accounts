@@ -14,4 +14,4 @@ steps:
     tags:
       - latest
       - master
-      - 2022.5.3.1
+      - 2022.6.3.1
