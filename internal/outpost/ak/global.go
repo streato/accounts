@@ -11,6 +11,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"goauthentik.io/api/v3"
 	"goauthentik.io/internal/constants"
+	sentryutils "goauthentik.io/internal/utils/sentry"
+	webutils "goauthentik.io/internal/utils/web"
 )
 
 var initialSetup = false
@@ -47,10 +49,11 @@ func doGlobalSetup(outpost api.Outpost, globalConfig *api.Config) {
 			l.WithField("env", globalConfig.ErrorReporting.Environment).Debug("Error reporting enabled")
 		}
 		err := sentry.Init(sentry.ClientOptions{
-			Dsn:              dsn,
-			Environment:      globalConfig.ErrorReporting.Environment,
-			TracesSampleRate: float64(globalConfig.ErrorReporting.TracesSampleRate),
-			Release:          fmt.Sprintf("authentik@%s", constants.VERSION),
+			Dsn:           dsn,
+			Environment:   globalConfig.ErrorReporting.Environment,
+			TracesSampler: sentryutils.SamplerFunc(float64(globalConfig.ErrorReporting.TracesSampleRate)),
+			Release:       fmt.Sprintf("authentik@%s", constants.VERSION),
+			HTTPTransport: webutils.NewUserAgentTransport(constants.OutpostUserAgent(), http.DefaultTransport),
 			IgnoreErrors: []string{
 				http.ErrAbortHandler.Error(),
 			},

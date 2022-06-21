@@ -1541,7 +1541,6 @@ msgid "Deny the user access"
 msgstr "拒绝用户访问"
 
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
-#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 msgid "Deprecated. Instead of using this field, configure the JWKS data/URL in Sources."
 msgstr ""
 
@@ -2451,7 +2450,6 @@ msgstr "隐藏服务账户"
 #: src/pages/outposts/OutpostForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
-#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/proxy/ProxyProviderForm.ts
 #: src/pages/providers/saml/SAMLProviderForm.ts
 #: src/pages/sources/ldap/LDAPSourceForm.ts
@@ -2735,7 +2733,6 @@ msgstr ""
 #~ msgstr "JWT 算法"
 
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
-#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 msgid "JWTs signed by certificates configured here can be used to authenticate to the provider."
 msgstr "此处配置的证书签名的 JWT 可以用于此提供程序的身份验证。"
 
@@ -2913,7 +2910,6 @@ msgstr "正在加载"
 #: src/pages/providers/ldap/LDAPProviderForm.ts
 #: src/pages/providers/ldap/LDAPProviderForm.ts
 #: src/pages/providers/ldap/LDAPProviderForm.ts
-#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
@@ -3656,6 +3652,10 @@ msgstr "（可选）设置 “断言” 属性的'友好名称'值。"
 #~ msgid "Optionally set this to your parent domain, if you want authentication and authorization to happen on a domain level. If you're running applications as app1.domain.tld, app2.domain.tld, set this to 'domain.tld'."
 #~ msgstr "如果您希望在域级别进行身份验证和授权，可以选择将其设置为您的父域。如果你以 app1.domain.tld、app2.domain.tld 的身份运行应用程序，请将其设置为 “domain.tld”。"
 
+#: src/flows/stages/identification/IdentificationStage.ts
+msgid "Or"
+msgstr ""
+
 #: src/pages/flows/BoundStagesList.ts
 #: src/pages/flows/StageBindingForm.ts
 #: src/pages/policies/BoundPoliciesList.ts
@@ -4249,8 +4249,8 @@ msgstr "必需。"
 
 #: src/pages/users/ServiceAccountForm.ts
 #: src/pages/users/UserForm.ts
-msgid "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
-msgstr "必填。不超过 150 个字符。仅限字母、数字和 @/./+/-/_ 。"
+#~ msgid "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
+#~ msgstr "必填。不超过 150 个字符。仅限字母、数字和 @/./+/-/_ 。"
 
 #: src/pages/users/UserViewPage.ts
 msgid "Reset Password"
@@ -6168,6 +6168,11 @@ msgstr "用户的头像"
 msgid "User's display name."
 msgstr "用户的显示名称。"
 
+#: src/pages/users/ServiceAccountForm.ts
+#: src/pages/users/UserForm.ts
+msgid "User's primary identifier. 150 characters or fewer."
+msgstr ""
+
 #: src/pages/users/RelatedUserList.ts
 #: src/pages/users/UserListPage.ts
 msgid "User(s)"
@@ -6261,8 +6266,8 @@ msgid "Verification Certificate"
 msgstr "验证证书"
 
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
-msgid "Verification certificates"
-msgstr "验证证书"
+#~ msgid "Verification certificates"
+#~ msgstr "验证证书"
 
 #: src/pages/stages/authenticator_sms/AuthenticatorSMSStageForm.ts
 #~ msgid "Verify only"

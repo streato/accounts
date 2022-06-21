@@ -1541,7 +1541,6 @@ msgid "Deny the user access"
 msgstr "Odmów użytkownikowi dostępu"
 
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
-#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 msgid "Deprecated. Instead of using this field, configure the JWKS data/URL in Sources."
 msgstr ""
 
@@ -2459,7 +2458,6 @@ msgstr "Ukryj konta serwisowe"
 #: src/pages/outposts/OutpostForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
-#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/proxy/ProxyProviderForm.ts
 #: src/pages/providers/saml/SAMLProviderForm.ts
 #: src/pages/sources/ldap/LDAPSourceForm.ts
@@ -2744,7 +2742,6 @@ msgstr ""
 #~ msgstr "Algorytm JWT"
 
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
-#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 msgid "JWTs signed by certificates configured here can be used to authenticate to the provider."
 msgstr ""
 
@@ -2923,7 +2920,6 @@ msgstr "Ładowanie"
 #: src/pages/providers/ldap/LDAPProviderForm.ts
 #: src/pages/providers/ldap/LDAPProviderForm.ts
 #: src/pages/providers/ldap/LDAPProviderForm.ts
-#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
@@ -3670,6 +3666,10 @@ msgstr "Opcjonalnie ustaw wartość „FriendlyName” atrybutu asercji."
 #~ msgid "Optionally set this to your parent domain, if you want authentication and authorization to happen on a domain level. If you're running applications as app1.domain.tld, app2.domain.tld, set this to 'domain.tld'."
 #~ msgstr "Opcjonalnie ustaw to na swoją domenę nadrzędną, jeśli chcesz, aby uwierzytelnianie i autoryzacja odbywały się na poziomie domeny. Jeśli używasz aplikacji jako app1.domain.tld, app2.domain.tld, ustaw to na „domain.tld”."
 
+#: src/flows/stages/identification/IdentificationStage.ts
+msgid "Or"
+msgstr ""
+
 #: src/pages/flows/BoundStagesList.ts
 #: src/pages/flows/StageBindingForm.ts
 #: src/pages/policies/BoundPoliciesList.ts
@@ -4271,8 +4271,8 @@ msgstr "Wymagany."
 
 #: src/pages/users/ServiceAccountForm.ts
 #: src/pages/users/UserForm.ts
-msgid "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
-msgstr "Wymagane. 150 znaków lub mniej. Tylko litery, cyfry i @/./+/-/_."
+#~ msgid "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
+#~ msgstr "Wymagane. 150 znaków lub mniej. Tylko litery, cyfry i @/./+/-/_."
 
 #: src/pages/users/UserViewPage.ts
 msgid "Reset Password"
@@ -6197,6 +6197,11 @@ msgstr "Awatar użytkownika"
 msgid "User's display name."
 msgstr "Wyświetlana nazwa użytkownika."
 
+#: src/pages/users/ServiceAccountForm.ts
+#: src/pages/users/UserForm.ts
+msgid "User's primary identifier. 150 characters or fewer."
+msgstr ""
+
 #: src/pages/users/RelatedUserList.ts
 #: src/pages/users/UserListPage.ts
 msgid "User(s)"
@@ -6290,8 +6295,8 @@ msgid "Verification Certificate"
 msgstr "Certyfikat weryfikacji"
 
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
-msgid "Verification certificates"
-msgstr ""
+#~ msgid "Verification certificates"
+#~ msgstr ""
 
 #: src/pages/stages/authenticator_sms/AuthenticatorSMSStageForm.ts
 #~ msgid "Verify only"

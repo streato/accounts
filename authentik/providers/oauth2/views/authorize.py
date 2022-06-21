@@ -2,7 +2,7 @@
 from dataclasses import dataclass, field
 from datetime import timedelta
 from re import error as RegexError
-from re import escape, fullmatch
+from re import fullmatch
 from typing import Optional
 from urllib.parse import parse_qs, urlencode, urlparse, urlsplit, urlunsplit
 from uuid import uuid4
@@ -181,7 +181,7 @@ class OAuthAuthorizationParams:
 
         if self.provider.redirect_uris == "":
             LOGGER.info("Setting redirect for blank redirect_uris", redirect=self.redirect_uri)
-            self.provider.redirect_uris = escape(self.redirect_uri)
+            self.provider.redirect_uris = self.redirect_uri
             self.provider.save()
             allowed_redirect_urls = self.provider.redirect_uris.split()
 
@@ -194,14 +194,20 @@ class OAuthAuthorizationParams:
         try:
             if not any(fullmatch(x, self.redirect_uri) for x in allowed_redirect_urls):
                 LOGGER.warning(
-                    "Invalid redirect uri",
+                    "Invalid redirect uri (regex comparison)",
                     redirect_uri=self.redirect_uri,
                     expected=allowed_redirect_urls,
                 )
                 raise RedirectUriError(self.redirect_uri, allowed_redirect_urls)
         except RegexError as exc:
-            LOGGER.warning("Invalid regular expression configured", exc=exc)
-            raise RedirectUriError(self.redirect_uri, allowed_redirect_urls)
+            LOGGER.info("Failed to parse regular expression, checking directly", exc=exc)
+            if not any(x == self.redirect_uri for x in allowed_redirect_urls):
+                LOGGER.warning(
+                    "Invalid redirect uri (strict comparison)",
+                    redirect_uri=self.redirect_uri,
+                    expected=allowed_redirect_urls,
+                )
+                raise RedirectUriError(self.redirect_uri, allowed_redirect_urls)
         if self.request:
             raise AuthorizeError(
                 self.redirect_uri, "request_not_supported", self.grant_type, self.state
@@ -459,7 +465,6 @@ class OAuthFulfillmentStage(StageView):
     def create_response_uri(self) -> str:
         """Create a final Response URI the user is redirected to."""
         uri = urlsplit(self.params.redirect_uri)
-        query_params = parse_qs(uri.query)
 
         try:
             code = None
@@ -472,6 +477,7 @@ class OAuthFulfillmentStage(StageView):
                 code.save(force_insert=True)
 
             if self.params.response_mode == ResponseMode.QUERY:
+                query_params = parse_qs(uri.query)
                 query_params["code"] = code.code
                 query_params["state"] = [str(self.params.state) if self.params.state else ""]
 
@@ -488,7 +494,12 @@ class OAuthFulfillmentStage(StageView):
                 return urlunsplit(uri)
 
             if self.params.response_mode == ResponseMode.FORM_POST:
-                post_params = self.create_implicit_response(code)
+                post_params = {}
+                if self.params.grant_type in [GrantTypes.AUTHORIZATION_CODE]:
+                    post_params["code"] = code.code
+                    post_params["state"] = [str(self.params.state) if self.params.state else ""]
+                else:
+                    post_params = self.create_implicit_response(code)
 
                 uri = uri._replace(query=urlencode(post_params, doseq=True))
 

@@ -1544,7 +1544,6 @@ msgid "Deny the user access"
 msgstr "Kullanıcı erişimini engelle"
 
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
-#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 msgid "Deprecated. Instead of using this field, configure the JWKS data/URL in Sources."
 msgstr ""
 
@@ -2462,7 +2461,6 @@ msgstr "Hizmet hesaplarını gizle"
 #: src/pages/outposts/OutpostForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
-#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/proxy/ProxyProviderForm.ts
 #: src/pages/providers/saml/SAMLProviderForm.ts
 #: src/pages/sources/ldap/LDAPSourceForm.ts
@@ -2748,7 +2746,6 @@ msgstr ""
 #~ msgstr "JWT Algoritması"
 
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
-#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 msgid "JWTs signed by certificates configured here can be used to authenticate to the provider."
 msgstr ""
 
@@ -2927,7 +2924,6 @@ msgstr "Yükleniyor"
 #: src/pages/providers/ldap/LDAPProviderForm.ts
 #: src/pages/providers/ldap/LDAPProviderForm.ts
 #: src/pages/providers/ldap/LDAPProviderForm.ts
-#: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
@@ -3675,6 +3671,10 @@ msgstr "İsteğe bağlı olarak onaylama özniteliğinin 'FriendlyName' değerin
 #~ msgid "Optionally set this to your parent domain, if you want authentication and authorization to happen on a domain level. If you're running applications as app1.domain.tld, app2.domain.tld, set this to 'domain.tld'."
 #~ msgstr "Kimlik doğrulama ve yetkilendirmenin etki alanı düzeyinde gerçekleşmesini istiyorsanız, isteğe bağlı olarak bunu üst etki alanınıza ayarlayın. Uygulamaları app1.domain.tld, app2.domain.tld olarak çalıştırıyorsanız, bunu 'domain.tld' olarak ayarlayın."
 
+#: src/flows/stages/identification/IdentificationStage.ts
+msgid "Or"
+msgstr ""
+
 #: src/pages/flows/BoundStagesList.ts
 #: src/pages/flows/StageBindingForm.ts
 #: src/pages/policies/BoundPoliciesList.ts
@@ -4276,8 +4276,8 @@ msgstr "Zorunlu."
 
 #: src/pages/users/ServiceAccountForm.ts
 #: src/pages/users/UserForm.ts
-msgid "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
-msgstr "Gerekli. 150 karakter veya daha az. Harfler, rakamlar ve yalnızca @/./+/-/_."
+#~ msgid "Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only."
+#~ msgstr "Gerekli. 150 karakter veya daha az. Harfler, rakamlar ve yalnızca @/./+/-/_."
 
 #: src/pages/users/UserViewPage.ts
 msgid "Reset Password"
@@ -6202,6 +6202,11 @@ msgstr "Kullanıcının avatarı"
 msgid "User's display name."
 msgstr "Kullanıcının görünen adı."
 
+#: src/pages/users/ServiceAccountForm.ts
+#: src/pages/users/UserForm.ts
+msgid "User's primary identifier. 150 characters or fewer."
+msgstr ""
+
 #: src/pages/users/RelatedUserList.ts
 #: src/pages/users/UserListPage.ts
 msgid "User(s)"
@@ -6295,8 +6300,8 @@ msgid "Verification Certificate"
 msgstr "Doğrulama Sertifikası"
 
 #: src/pages/providers/oauth2/OAuth2ProviderForm.ts
-msgid "Verification certificates"
-msgstr ""
+#~ msgid "Verification certificates"
+#~ msgstr ""
 
 #: src/pages/stages/authenticator_sms/AuthenticatorSMSStageForm.ts
 #~ msgid "Verify only"
