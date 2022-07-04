@@ -1,27 +1,29 @@
+import { DEFAULT_CONFIG } from "@goauthentik/web/api/Config";
+import "@goauthentik/web/elements/forms/ProxyForm";
+import { paramURL } from "@goauthentik/web/elements/router/RouterOutlet";
+import "@goauthentik/web/elements/wizard/FormWizardPage";
+import "@goauthentik/web/elements/wizard/Wizard";
+import { WizardPage } from "@goauthentik/web/elements/wizard/WizardPage";
+import "@goauthentik/web/pages/providers/ldap/LDAPProviderForm";
+import "@goauthentik/web/pages/providers/oauth2/OAuth2ProviderForm";
+import "@goauthentik/web/pages/providers/proxy/ProxyProviderForm";
+import "@goauthentik/web/pages/providers/saml/SAMLProviderForm";
+import "@goauthentik/web/pages/providers/saml/SAMLProviderImportForm";
+
 import { t } from "@lingui/macro";
 
 import { customElement } from "@lit/reactive-element/decorators/custom-element.js";
 import { CSSResult, LitElement, TemplateResult, html } from "lit";
 import { property } from "lit/decorators.js";
 
-import AKGlobal from "../../authentik.css";
+import AKGlobal from "@goauthentik/web/authentik.css";
 import PFButton from "@patternfly/patternfly/components/Button/button.css";
 import PFForm from "@patternfly/patternfly/components/Form/form.css";
+import PFHint from "@patternfly/patternfly/components/Hint/hint.css";
 import PFRadio from "@patternfly/patternfly/components/Radio/radio.css";
 import PFBase from "@patternfly/patternfly/patternfly-base.css";
 
 import { ProvidersApi, TypeCreate } from "@goauthentik/api";
-
-import { DEFAULT_CONFIG } from "../../api/Config";
-import "../../elements/forms/ProxyForm";
-import "../../elements/wizard/FormWizardPage";
-import "../../elements/wizard/Wizard";
-import { WizardPage } from "../../elements/wizard/WizardPage";
-import "./ldap/LDAPProviderForm";
-import "./oauth2/OAuth2ProviderForm";
-import "./proxy/ProxyProviderForm";
-import "./saml/SAMLProviderForm";
-import "./saml/SAMLProviderImportForm";
 
 @customElement("ak-provider-wizard-initial")
 export class InitialProviderWizardPage extends WizardPage {
@@ -29,11 +31,31 @@ export class InitialProviderWizardPage extends WizardPage {
     providerTypes: TypeCreate[] = [];
 
     static get styles(): CSSResult[] {
-        return [PFBase, PFForm, PFButton, AKGlobal, PFRadio];
+        return [PFBase, PFForm, PFHint, PFButton, AKGlobal, PFRadio];
+    }
+    sidebarLabel = () => t`Select type`;
+
+    renderHint(): TemplateResult {
+        return html`<div class="pf-c-hint">
+                <div class="pf-c-hint__title">${t`Try the new application wizard`}</div>
+                <div class="pf-c-hint__body">
+                    ${t`The new application wizard greatly simplifies the steps required to create applications and providers.`}
+                </div>
+                <div class="pf-c-hint__footer">
+                    <a
+                        class="pf-c-button pf-m-link pf-m-inline"
+                        href=${paramURL("/core/applications", {
+                            createForm: true,
+                        })}
+                        >${t`Try it now`}</a
+                    >
+                </div>
+            </div>
+            <br />`;
     }
 
     render(): TemplateResult {
-        return html`<form class="pf-c-form pf-m-horizontal">
+        return html` <form class="pf-c-form pf-m-horizontal">
             ${this.providerTypes.map((type) => {
                 return html`<div class="pf-c-radio">
                     <input
@@ -42,15 +64,15 @@ export class InitialProviderWizardPage extends WizardPage {
                         name="type"
                         id=${type.component}
                         @change=${() => {
-                            this.host.setSteps("initial", `type-${type.component}`);
-                            this._isValid = true;
+                            this.host.steps = ["initial", `type-${type.component}`];
+                            this.host.isValid = true;
                         }}
                     />
                     <label class="pf-c-radio__label" for=${type.component}>${type.name}</label>
                     <span class="pf-c-radio__description">${type.description}</span>
                 </div>`;
             })}
-        </form> `;
+        </form>`;
     }
 }
 
@@ -87,11 +109,7 @@ export class ProviderWizard extends LitElement {
                     return this.finalHandler();
                 }}
             >
-                <ak-provider-wizard-initial
-                    slot="initial"
-                    .sidebarLabel=${() => t`Select type`}
-                    .providerTypes=${this.providerTypes}
-                >
+                <ak-provider-wizard-initial slot="initial" .providerTypes=${this.providerTypes}>
                 </ak-provider-wizard-initial>
                 ${this.providerTypes.map((type) => {
                     return html`

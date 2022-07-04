@@ -45,8 +45,8 @@ lint-fix:
 		website/developer-docs
 
 lint:
-	bandit -r authentik tests lifecycle -x node_modules
 	pylint authentik tests lifecycle
+	bandit -r authentik tests lifecycle -x node_modules
 	golangci-lint run -v
 
 i18n-extract: i18n-extract-core web-extract
@@ -112,6 +112,9 @@ web-install:
 	cd web && npm ci
 
 web-watch:
+	rm -rf web/dist/
+	mkdir web/dist/
+	touch web/dist/.gitkeep
 	cd web && npm run watch
 
 web-lint-fix:
@@ -166,8 +169,3 @@ ci-pending-migrations: ci--meta-debug
 
 install: web-install website-install
 	poetry install
-
-a: install
-	tmux \
-		new-session 'make run' \; \
-		split-window 'make web-watch'

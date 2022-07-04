@@ -1,3 +1,9 @@
+import { DeniedActionEnum } from "@goauthentik/api/dist/models/DeniedActionEnum.js";
+import { DEFAULT_CONFIG, config } from "@goauthentik/web/api/Config";
+import "@goauthentik/web/elements/forms/HorizontalFormElement";
+import { ModelForm } from "@goauthentik/web/elements/forms/ModelForm";
+import { first } from "@goauthentik/web/utils";
+
 import { t } from "@lingui/macro";
 
 import { TemplateResult, html } from "lit";
@@ -14,10 +20,6 @@ import {
     PolicyEngineMode,
 } from "@goauthentik/api";
 
-import { DEFAULT_CONFIG, config } from "../../api/Config";
-import "../../elements/forms/HorizontalFormElement";
-import { ModelForm } from "../../elements/forms/ModelForm";
-import { first } from "../../utils";
 import { DesignationToLabel, LayoutToLabel } from "./utils";
 
 @customElement("ak-flow-form")
@@ -53,7 +55,7 @@ export class FlowForm extends ModelForm<Flow, string> {
         }
         const c = await config();
         if (c.capabilities.includes(CapabilitiesEnum.SaveMedia)) {
-            const icon = this.getFormFile();
+            const icon = this.getFormFiles()["background"];
             if (icon || this.clearBackground) {
                 await new FlowsApi(DEFAULT_CONFIG).flowsInstancesSetBackgroundCreate({
                     slug: flow.slug,
@@ -117,6 +119,27 @@ export class FlowForm extends ModelForm<Flow, string> {
                 ${DesignationToLabel(FlowDesignationEnum.Unenrollment)}
             </option>
         `;
+    }
+
+    renderDeniedAction(): TemplateResult {
+        return html` <option
+                value=${DeniedActionEnum.MessageContinue}
+                ?selected=${this.instance?.deniedAction === DeniedActionEnum.MessageContinue}
+            >
+                ${t`MESSAGE_CONTINUE will follow the ?next parameter if set, otherwise show a message.`}
+            </option>
+            <option
+                value=${DeniedActionEnum.Continue}
+                ?selected=${this.instance?.deniedAction === DeniedActionEnum.Continue}
+            >
+                ${t`CONTINUE will either follow the ?next parameter or redirect to the default interface.`}
+            </option>
+            <option
+                value=${DeniedActionEnum.Message}
+                ?selected=${this.instance?.deniedAction === DeniedActionEnum.Message}
+            >
+                ${t`MESSAGE will notify the user the flow isn't applicable.`}
+            </option>`;
     }
 
     renderLayout(): TemplateResult {
@@ -215,6 +238,18 @@ export class FlowForm extends ModelForm<Flow, string> {
                 </select>
                 <p class="pf-c-form__helper-text">
                     ${t`Decides what this Flow is used for. For example, the Authentication flow is redirect to when an un-authenticated user visits authentik.`}
+                </p>
+            </ak-form-element-horizontal>
+            <ak-form-element-horizontal
+                label=${t`Denied action`}
+                ?required=${true}
+                name="deniedAction"
+            >
+                <select class="pf-c-form-control">
+                    ${this.renderDeniedAction()}
+                </select>
+                <p class="pf-c-form__helper-text">
+                    ${t`Decides the response when a policy denies access to this flow for a user.`}
                 </p>
             </ak-form-element-horizontal>
             <ak-form-element-horizontal label=${t`Layout`} ?required=${true} name="layout">

@@ -24,7 +24,13 @@ from drf_spectacular.utils import (
 )
 from guardian.shortcuts import get_anonymous_user, get_objects_for_user
 from rest_framework.decorators import action
-from rest_framework.fields import CharField, JSONField, ListField, SerializerMethodField
+from rest_framework.fields import (
+    CharField,
+    IntegerField,
+    JSONField,
+    ListField,
+    SerializerMethodField,
+)
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import (
@@ -57,6 +63,9 @@ from authentik.core.models import (
     User,
 )
 from authentik.events.models import EventAction
+from authentik.flows.models import FlowToken
+from authentik.flows.planner import PLAN_CONTEXT_PENDING_USER, FlowPlanner
+from authentik.flows.views.executor import QS_KEY_TOKEN
 from authentik.stages.email.models import EmailStage
 from authentik.stages.email.tasks import send_mails
 from authentik.stages.email.utils import TemplateEmailMessage
@@ -288,12 +297,23 @@ class UserViewSet(UsedByMixin, ModelViewSet):
             LOGGER.debug("No recovery flow set")
             return None, None
         user: User = self.get_object()
-        token, __ = Token.objects.get_or_create(
-            identifier=f"{user.uid}-password-reset",
-            user=user,
-            intent=TokenIntents.INTENT_RECOVERY,
+        planner = FlowPlanner(flow)
+        planner.allow_empty_flows = True
+        plan = planner.plan(
+            self.request._request,
+            {
+                PLAN_CONTEXT_PENDING_USER: user,
+            },
         )
-        querystring = urlencode({"token": token.key})
+        token, __ = FlowToken.objects.update_or_create(
+            identifier=f"{user.uid}-password-reset",
+            defaults={
+                "user": user,
+                "flow": flow,
+                "_plan": FlowToken.pickle(plan),
+            },
+        )
+        querystring = urlencode({QS_KEY_TOKEN: token.key})
         link = self.request.build_absolute_uri(
             reverse_lazy("authentik_core:if-flow", kwargs={"flow_slug": flow.slug})
             + f"?{querystring}"
@@ -315,6 +335,9 @@ class UserViewSet(UsedByMixin, ModelViewSet):
                 {
                     "username": CharField(required=True),
                     "token": CharField(required=True),
+                    "user_uid": CharField(required=True),
+                    "user_pk": IntegerField(required=True),
+                    "group_pk": CharField(required=False),
                 },
             )
         },
@@ -332,18 +355,25 @@ class UserViewSet(UsedByMixin, ModelViewSet):
                     attributes={USER_ATTRIBUTE_SA: True, USER_ATTRIBUTE_TOKEN_EXPIRING: False},
                     path=USER_PATH_SERVICE_ACCOUNT,
                 )
+                response = {
+                    "username": user.username,
+                    "user_uid": user.uid,
+                    "user_pk": user.pk,
+                }
                 if create_group and self.request.user.has_perm("authentik_core.add_group"):
                     group = Group.objects.create(
                         name=username,
                     )
                     group.users.add(user)
+                    response["group_pk"] = str(group.pk)
                 token = Token.objects.create(
                     identifier=slugify(f"service-account-{username}-password"),
                     intent=TokenIntents.INTENT_APP_PASSWORD,
                     user=user,
                     expires=now() + timedelta(days=360),
                 )
-                return Response({"username": user.username, "token": token.key})
+                response["token"] = token.key
+                return Response(response)
             except (IntegrityError) as exc:
                 return Response(data={"non_field_errors": [str(exc)]}, status=400)
 
@@ -361,7 +391,7 @@ class UserViewSet(UsedByMixin, ModelViewSet):
                 instance=request._request.session[SESSION_KEY_IMPERSONATE_ORIGINAL_USER],
                 context=context,
             ).data
-        self.request.session.save()
+        self.request.session.modified = True
         return Response(serializer.initial_data)
 
     @permission_required("authentik_core.reset_user_password")

@@ -102,7 +102,11 @@ module.exports = {
             items: [
                 "flow/layouts",
                 "flow/inspector",
-                "flow/examples",
+                {
+                    type: "category",
+                    label: "Examples",
+                    items: ["flow/examples/flows", "flow/examples/snippets"],
+                },
                 {
                     type: "category",
                     label: "Executors",
@@ -201,13 +205,14 @@ module.exports = {
                 description: "Release notes for recent authentik versions",
             },
             items: [
+                "releases/v2022.7",
                 "releases/v2022.6",
                 "releases/v2022.5",
-                "releases/v2022.4",
                 {
                     type: "category",
                     label: "Previous versions",
                     items: [
+                        "releases/v2022.4",
                         "releases/v2022.2",
                         "releases/v2022.1",
                         "releases/v2021.12",
@@ -241,6 +246,18 @@ module.exports = {
                 description: "Troubleshooting various issues",
             },
             items: [
+                {
+                    type: "category",
+                    label: "Forward auth",
+                    items: ["troubleshooting/forward_auth/general"],
+                    link: {
+                        type: "generated-index",
+                        title: "Forward auth troubleshooting",
+                        slug: "troubleshooting/forward_auth",
+                        description:
+                            "Steps to help debug forward auth setups with various reverse proxies.",
+                    },
+                },
                 "troubleshooting/access",
                 "troubleshooting/emails",
                 "troubleshooting/login",

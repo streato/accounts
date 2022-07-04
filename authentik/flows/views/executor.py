@@ -10,6 +10,7 @@ from django.http import Http404, HttpRequest, HttpResponse, HttpResponseRedirect
 from django.http.request import QueryDict
 from django.shortcuts import get_object_or_404, redirect
 from django.template.response import TemplateResponse
+from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.generic import View
@@ -37,6 +38,7 @@ from authentik.flows.exceptions import EmptyFlowException, FlowNonApplicableExce
 from authentik.flows.models import (
     ConfigurableStage,
     Flow,
+    FlowDeniedAction,
     FlowDesignation,
     FlowStageBinding,
     FlowToken,
@@ -54,6 +56,7 @@ from authentik.lib.sentry import SentryIgnoredException
 from authentik.lib.utils.errors import exception_to_string
 from authentik.lib.utils.reflection import all_subclasses, class_to_path
 from authentik.lib.utils.urls import is_url_absolute, redirect_with_qs
+from authentik.policies.engine import PolicyEngine
 from authentik.tenants.models import Tenant
 
 LOGGER = get_logger()
@@ -129,21 +132,27 @@ class FlowExecutorView(APIView):
         self._logger = get_logger().bind(flow_slug=flow_slug)
         set_tag("authentik.flow", self.flow.slug)
 
-    def handle_invalid_flow(self, exc: BaseException) -> HttpResponse:
+    def handle_invalid_flow(self, exc: FlowNonApplicableException) -> HttpResponse:
         """When a flow is non-applicable check if user is on the correct domain"""
-        if NEXT_ARG_NAME in self.request.GET:
-            if not is_url_absolute(self.request.GET.get(NEXT_ARG_NAME)):
+        if self.flow.denied_action in [
+            FlowDeniedAction.CONTINUE,
+            FlowDeniedAction.MESSAGE_CONTINUE,
+        ]:
+            next_url = self.request.GET.get(NEXT_ARG_NAME)
+            if next_url and not is_url_absolute(next_url):
                 self._logger.debug("f(exec): Redirecting to next on fail")
-                return redirect(self.request.GET.get(NEXT_ARG_NAME))
-        message = exc.__doc__ if exc.__doc__ else str(exc)
-        return self.stage_invalid(error_message=message)
+                return to_stage_response(self.request, redirect(next_url))
+        if self.flow.denied_action == FlowDeniedAction.CONTINUE:
+            return to_stage_response(
+                self.request, redirect(reverse("authentik_core:root-redirect"))
+            )
+        return to_stage_response(self.request, self.stage_invalid(error_message=exc.messages))
 
-    def _check_flow_token(self, get_params: QueryDict):
+    def _check_flow_token(self, key: str) -> Optional[FlowPlan]:
         """Check if the user is using a flow token to restore a plan"""
-        tokens = FlowToken.filter_not_expired(key=get_params[QS_KEY_TOKEN])
-        if not tokens.exists():
-            return False
-        token: FlowToken = tokens.first()
+        token: Optional[FlowToken] = FlowToken.filter_not_expired(key=key).first()
+        if not token:
+            return None
         try:
             plan = token.plan
         except (AttributeError, EOFError, ImportError, IndexError) as exc:
@@ -164,7 +173,7 @@ class FlowExecutorView(APIView):
             span.set_data("authentik Flow", self.flow.slug)
             get_params = QueryDict(request.GET.get("query", ""))
             if QS_KEY_TOKEN in get_params:
-                plan = self._check_flow_token(get_params)
+                plan = self._check_flow_token(get_params[QS_KEY_TOKEN])
                 if plan:
                     self.request.session[SESSION_KEY_PLAN] = plan
             # Early check if there's an active Plan for the current session
@@ -188,7 +197,7 @@ class FlowExecutorView(APIView):
                     self.plan = self._initiate_plan()
                 except FlowNonApplicableException as exc:
                     self._logger.warning("f(exec): Flow not applicable to current user", exc=exc)
-                    return to_stage_response(self.request, self.handle_invalid_flow(exc))
+                    return self.handle_invalid_flow(exc)
                 except EmptyFlowException as exc:
                     self._logger.warning("f(exec): Flow is empty", exc=exc)
                     # To match behaviour with loading an empty flow plan from cache,
@@ -471,6 +480,20 @@ class ToDefaultFlow(View):
 
     designation: Optional[FlowDesignation] = None
 
+    def flow_by_policy(self, request: HttpRequest, **flow_filter) -> Optional[Flow]:
+        """Get a Flow by `**flow_filter` and check if the request from `request` can access it."""
+        flows = Flow.objects.filter(**flow_filter).order_by("slug")
+        for flow in flows:
+            engine = PolicyEngine(flow, request.user, request)
+            engine.build()
+            result = engine.result
+            if result.passing:
+                LOGGER.debug("flow_by_policy: flow passing", flow=flow)
+                return flow
+            LOGGER.warning("flow_by_policy: flow not passing", flow=flow, messages=result.messages)
+        LOGGER.debug("flow_by_policy: no flow found", filters=flow_filter)
+        return None
+
     def dispatch(self, request: HttpRequest) -> HttpResponse:
         tenant: Tenant = request.tenant
         flow = None
@@ -481,7 +504,7 @@ class ToDefaultFlow(View):
             flow = tenant.flow_invalidation
         # If no flow was set, get the first based on slug and policy
         if not flow:
-            flow = Flow.with_policy(request, designation=self.designation)
+            flow = self.flow_by_policy(request, designation=self.designation)
         # If we still don't have a flow, 404
         if not flow:
             raise Http404

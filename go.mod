@@ -25,8 +25,8 @@ require (
 	github.com/prometheus/client_golang v1.12.2
 	github.com/quasoft/memstore v0.0.0-20191010062613-2bce066d2b0b
 	github.com/sirupsen/logrus v1.8.1
-	github.com/stretchr/testify v1.7.4
-	goauthentik.io/api/v3 v3.2022063.1
+	github.com/stretchr/testify v1.8.0
+	goauthentik.io/api/v3 v3.2022063.5
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 	gopkg.in/boj/redistore.v1 v1.0.0-20160128113310-fc113767cd6b

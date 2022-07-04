@@ -143,7 +143,10 @@ class OAuth2Provider(Provider):
         choices=ClientTypes.choices,
         default=ClientTypes.CONFIDENTIAL,
         verbose_name=_("Client Type"),
-        help_text=_(ClientTypes.__doc__),
+        help_text=_(
+            "Confidential clients are capable of maintaining the confidentiality "
+            "of their credentials. Public clients are incapable"
+        ),
     )
     client_id = models.CharField(
         max_length=255,
@@ -239,7 +242,7 @@ class OAuth2Provider(Provider):
         token = RefreshToken(
             user=user,
             provider=self,
-            refresh_token=generate_key(),
+            refresh_token=base64.urlsafe_b64encode(generate_key().encode()).decode(),
             expires=timezone.now() + timedelta_from_string(self.token_validity),
             scope=scope,
         )
