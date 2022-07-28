@@ -26,7 +26,7 @@ from structlog.stdlib import get_logger
 from authentik.core.exceptions import PropertyMappingExpressionException
 from authentik.core.signals import password_changed
 from authentik.core.types import UILoginButton, UserSettingSerializer
-from authentik.lib.config import CONFIG
+from authentik.lib.config import CONFIG, get_path_from_dict
 from authentik.lib.generators import generate_id
 from authentik.lib.models import CreatedUpdatedModel, DomainlessURLValidator, SerializerModel
 from authentik.lib.utils.http import get_client_ip
@@ -213,9 +213,11 @@ class User(GuardianUserMixin, AbstractUser):
         mode: str = CONFIG.y("avatars", "none")
         if mode == "none":
             return DEFAULT_AVATAR
-        # gravatar uses md5 for their URLs, so md5 can't be avoided
+        if mode.startswith("attributes."):
+            return get_path_from_dict(self.attributes, mode[11:], default=DEFAULT_AVATAR)
         mail_hash = md5(self.email.lower().encode("utf-8")).hexdigest()  # nosec
         if mode == "gravatar":
+            # gravatar uses md5 for their URLs, so md5 can't be avoided
             parameters = [
                 ("s", "158"),
                 ("r", "g"),
@@ -482,8 +484,9 @@ class ExpiringModel(models.Model):
     def filter_not_expired(cls, **kwargs) -> QuerySet:
         """Filer for tokens which are not expired yet or are not expiring,
         and match filters in `kwargs`"""
-        expired = Q(expires__lt=now(), expiring=True)
-        return cls.objects.exclude(expired).filter(**kwargs)
+        for obj in cls.objects.filter(**kwargs).filter(Q(expires__lt=now(), expiring=True)):
+            obj.delete()
+        return cls.objects.filter(**kwargs)
 
     @property
     def is_expired(self) -> bool:

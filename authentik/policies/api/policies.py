@@ -5,7 +5,6 @@ from drf_spectacular.utils import OpenApiResponse, extend_schema
 from guardian.shortcuts import get_objects_for_user
 from rest_framework import mixins
 from rest_framework.decorators import action
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
@@ -158,7 +157,7 @@ class PolicyViewSet(
             pk=test_params.validated_data["user"].pk
         )
         if not users.exists():
-            raise PermissionDenied()
+            return Response(status=400)
 
         p_request = PolicyRequest(users.first())
         p_request.debug = True
