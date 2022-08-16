@@ -83,7 +83,7 @@ class AuthenticatorDuoStageView(ChallengeStageView):
         self.request.session.pop(SESSION_KEY_DUO_ACTIVATION_CODE)
         if not existing_device:
             DuoDevice.objects.create(
-                name="Duo Device",
+                name="Duo Authenticator",
                 user=self.get_pending_user(),
                 duo_user_id=user_id,
                 stage=stage,
@@ -94,5 +94,5 @@ class AuthenticatorDuoStageView(ChallengeStageView):
         return self.executor.stage_ok()
 
     def cleanup(self):
-        self.request.session.pop(SESSION_KEY_DUO_USER_ID)
-        self.request.session.pop(SESSION_KEY_DUO_ACTIVATION_CODE)
+        self.request.session.pop(SESSION_KEY_DUO_USER_ID, None)
+        self.request.session.pop(SESSION_KEY_DUO_ACTIVATION_CODE, None)

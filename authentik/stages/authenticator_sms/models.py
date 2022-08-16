@@ -11,10 +11,13 @@ from requests.exceptions import RequestException
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import BaseSerializer
 from structlog.stdlib import get_logger
+from twilio.base.exceptions import TwilioRestException
+from twilio.rest import Client
 
 from authentik.core.types import UserSettingSerializer
 from authentik.events.models import Event, EventAction
 from authentik.flows.models import ConfigurableStage, Stage
+from authentik.lib.models import SerializerModel
 from authentik.lib.utils.errors import exception_to_string
 from authentik.lib.utils.http import get_http_session
 
@@ -66,28 +69,16 @@ class AuthenticatorSMSStage(ConfigurableStage, Stage):
 
     def send_twilio(self, token: str, device: "SMSDevice"):
         """send sms via twilio provider"""
-        response = get_http_session().post(
-            f"https://api.twilio.com/2010-04-01/Accounts/{self.account_sid}/Messages.json",
-            data={
-                "From": self.from_number,
-                "To": device.phone_number,
-                "Body": token,
-            },
-            auth=(self.account_sid, self.auth),
-        )
-        LOGGER.debug("Sent SMS", to=device.phone_number)
-        try:
-            response.raise_for_status()
-        except RequestException as exc:
-            LOGGER.warning("Error sending token by Twilio SMS", exc=exc, body=response.text)
-            if response.status_code == 400:
-                raise ValidationError(response.json().get("message"))
-            raise
+        client = Client(self.account_sid, self.auth)
 
-        if "sid" not in response.json():
-            message = response.json().get("message")
-            LOGGER.warning("Error sending token by Twilio SMS", message=message)
-            raise Exception(message)
+        try:
+            message = client.messages.create(
+                to=device.phone_number, from_=self.from_number, body=token
+            )
+            LOGGER.debug("Sent SMS", to=device, message=message.sid)
+        except TwilioRestException as exc:
+            LOGGER.warning("Error sending token by Twilio SMS", exc=exc, msg=exc.msg)
+            raise ValidationError(exc.msg)
 
     def send_generic(self, token: str, device: "SMSDevice"):
         """Send SMS via outside API"""
@@ -173,7 +164,7 @@ def hash_phone_number(phone_number: str) -> str:
     return "hash:" + sha256(phone_number.encode()).hexdigest()
 
 
-class SMSDevice(SideChannelDevice):
+class SMSDevice(SerializerModel, SideChannelDevice):
     """SMS Device"""
 
     user = models.ForeignKey(get_user_model(), on_delete=models.CASCADE)
@@ -193,6 +184,12 @@ class SMSDevice(SideChannelDevice):
     def is_hashed(self) -> bool:
         """Check if the phone number is hashed"""
         return self.phone_number.startswith("hash:")
+
+    @property
+    def serializer(self) -> BaseSerializer:
+        from authentik.stages.authenticator_sms.api import SMSDeviceSerializer
+
+        return SMSDeviceSerializer
 
     def verify_token(self, token):
         valid = super().verify_token(token)
