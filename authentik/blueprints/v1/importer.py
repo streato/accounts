@@ -21,6 +21,7 @@ from yaml import load
 from authentik.blueprints.v1.common import (
     Blueprint,
     BlueprintEntry,
+    BlueprintEntryState,
     BlueprintLoader,
     EntryInvalidError,
 )
@@ -168,7 +169,9 @@ class Importer:
             serializer_kwargs["instance"] = model_instance
             serializer_kwargs["partial"] = True
         else:
-            self.logger.debug("initialise new instance", model=model, **updated_identifiers)
+            self.logger.debug(
+                "initialised new serializer instance", model=model, **updated_identifiers
+            )
             model_instance = model()
             # pk needs to be set on the model instance otherwise a new one will be generated
             if "pk" in updated_identifiers:
@@ -214,13 +217,13 @@ class Importer:
             try:
                 serializer = self._validate_single(entry)
             except EntryInvalidError as exc:
-                self.logger.warning("entry invalid", entry=entry, error=exc)
+                self.logger.warning(f"entry invalid: {exc}", entry=entry, error=exc)
                 return False
 
             model = serializer.save()
             if "pk" in entry.identifiers:
                 self.__pk_map[entry.identifiers["pk"]] = model.pk
-            entry._instance = model
+            entry._state = BlueprintEntryState(model)
             self.logger.debug("updated model", model=model, pk=model.pk)
         return True
 
@@ -230,7 +233,7 @@ class Importer:
         self.logger.debug("Starting blueprint import validation")
         orig_import = deepcopy(self.__import)
         if self.__import.version != 1:
-            self.logger.warning("Invalid bundle version")
+            self.logger.warning("Invalid blueprint version")
             return False, []
         with (
             transaction_rollback(),
@@ -238,7 +241,7 @@ class Importer:
         ):
             successful = self._apply_models()
             if not successful:
-                self.logger.debug("blueprint validation failed")
+                self.logger.debug("Blueprint validation failed")
         for log in logs:
             self.logger.debug(**log)
         self.__import = orig_import
