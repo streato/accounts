@@ -45,8 +45,8 @@ class BlueprintEntryState:
 class BlueprintEntry:
     """Single entry of a blueprint"""
 
-    identifiers: dict[str, Any]
     model: str
+    identifiers: dict[str, Any] = field(default_factory=dict)
     attrs: Optional[dict[str, Any]] = field(default_factory=dict)
 
     # pylint: disable=invalid-name
@@ -105,9 +105,9 @@ class Blueprint:
 
     version: int = field(default=1)
     entries: list[BlueprintEntry] = field(default_factory=list)
+    context: dict = field(default_factory=dict)
 
     metadata: Optional[BlueprintMetadata] = field(default=None)
-    context: Optional[dict] = field(default_factory=dict)
 
 
 class YAMLTag:
@@ -253,3 +253,9 @@ class BlueprintLoader(SafeLoader):
 
 class EntryInvalidError(SentryIgnoredException):
     """Error raised when an entry is invalid"""
+
+    serializer_errors: Optional[dict]
+
+    def __init__(self, *args: object, serializer_errors: Optional[dict] = None) -> None:
+        super().__init__(*args)
+        self.serializer_errors = serializer_errors

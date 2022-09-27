@@ -13,9 +13,11 @@ from django_otp.models import Device
 from rest_framework.fields import CharField, JSONField
 from rest_framework.serializers import ValidationError
 from structlog.stdlib import get_logger
-from webauthn import generate_authentication_options, verify_authentication_response
-from webauthn.helpers import base64url_to_bytes, options_to_json
+from webauthn.authentication.generate_authentication_options import generate_authentication_options
+from webauthn.authentication.verify_authentication_response import verify_authentication_response
+from webauthn.helpers.base64url_to_bytes import base64url_to_bytes
 from webauthn.helpers.exceptions import InvalidAuthenticationResponse
+from webauthn.helpers.options_to_json import options_to_json
 from webauthn.helpers.structs import AuthenticationCredential
 
 from authentik.core.api.utils import PassiveSerializer
@@ -173,7 +175,7 @@ def validate_challenge_duo(device_pk: int, stage_view: StageView, user: User) ->
         ).name
 
     try:
-        response = stage.client.auth(
+        response = stage.auth_client().auth(
             "auto",
             user_id=device.duo_user_id,
             ipaddr=get_client_ip(stage_view.request),

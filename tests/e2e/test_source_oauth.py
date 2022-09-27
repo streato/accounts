@@ -18,7 +18,7 @@ from authentik.core.models import User
 from authentik.flows.models import Flow
 from authentik.lib.generators import generate_id, generate_key
 from authentik.sources.oauth.models import OAuthSource
-from authentik.sources.oauth.types.manager import MANAGER, SourceType
+from authentik.sources.oauth.types.registry import SourceType, registry
 from authentik.sources.oauth.views.callback import OAuthCallback
 from authentik.stages.identification.models import IdentificationStage
 from tests.e2e.utils import SeleniumTestCase, retry
@@ -26,7 +26,7 @@ from tests.e2e.utils import SeleniumTestCase, retry
 CONFIG_PATH = "/tmp/dex.yml"  # nosec
 
 
-class OAUth1Callback(OAuthCallback):
+class OAuth1Callback(OAuthCallback):
     """OAuth1 Callback with custom getters"""
 
     def get_user_id(self, info: dict[str, str]) -> str:
@@ -43,11 +43,11 @@ class OAUth1Callback(OAuthCallback):
         }
 
 
-@MANAGER.type()
+@registry.register()
 class OAUth1Type(SourceType):
     """OAuth1 Type definition"""
 
-    callback_view = OAUth1Callback
+    callback_view = OAuth1Callback
     name = "OAuth1"
     slug = "oauth1"
 

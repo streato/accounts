@@ -3,10 +3,7 @@
 import importlib
 import logging
 import os
-import sys
 from hashlib import sha512
-from json import dumps
-from time import time
 from urllib.parse import quote_plus
 
 import structlog
@@ -19,20 +16,6 @@ from authentik.lib.logging import add_process_id
 from authentik.lib.sentry import sentry_init
 from authentik.lib.utils.reflection import get_env
 from authentik.stages.password import BACKEND_APP_PASSWORD, BACKEND_INBUILT, BACKEND_LDAP
-
-
-def j_print(event: str, log_level: str = "info", **kwargs):
-    """Print event in the same format as structlog with JSON.
-    Used before structlog is configured."""
-    data = {
-        "event": event,
-        "level": log_level,
-        "logger": __name__,
-        "timestamp": time(),
-    }
-    data.update(**kwargs)
-    print(dumps(data), file=sys.stderr)
-
 
 LOGGER = structlog.get_logger()
 
@@ -329,6 +312,7 @@ LOCALE_PATHS = ["./locale"]
 # Add a 10 minute timeout to all Celery tasks.
 CELERY_TASK_SOFT_TIME_LIMIT = 600
 CELERY_WORKER_MAX_TASKS_PER_CHILD = 50
+CELERY_WORKER_CONCURRENCY = 2
 CELERY_BEAT_SCHEDULE = {
     "clean_expired_models": {
         "task": "authentik.core.tasks.clean_expired_models",
@@ -484,4 +468,4 @@ if DEBUG:
 
 INSTALLED_APPS.append("authentik.core")
 
-j_print("Booting authentik", version=__version__)
+CONFIG.log("info", "Booting authentik", version=__version__)

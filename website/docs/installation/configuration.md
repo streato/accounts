@@ -15,6 +15,16 @@ All of these variables can be set to values, but you can also use a URI-like for
 -   `env://<name>` Loads the value from the environment variable `<name>`. Fallback can be optionally set like `env://<name>?<default>`
 -   `file://<name>` Loads the value from the file `<name>`. Fallback can be optionally set like `file://<name>?<default>`
 
+## Checking settings
+
+To check if your config has been applied correctly, you can run the following command to output the full config:
+
+```
+docker-compose run --rm worker dump_config
+# Or for kubernetes
+kubectl exec -it deployment/authentik-worker -c authentik -- ak dump_config
+```
+
 ## PostgreSQL Settings
 
 -   `AUTHENTIK_POSTGRESQL__HOST`: Hostname of your PostgreSQL Server
@@ -39,12 +49,12 @@ All of these variables can be set to values, but you can also use a URI-like for
 
 ## Listen Setting
 
--   `AUTHENTIK_LISTEN__HTTP`: Listening port for HTTP (Server and Proxy outpost)
--   `AUTHENTIK_LISTEN__HTTPS`: Listening port for HTTPS (Server and Proxy outpost)
--   `AUTHENTIK_LISTEN__LDAP`: Listening port for LDAP (LDAP outpost)
--   `AUTHENTIK_LISTEN__LDAPS`: Listening port for LDAPS (LDAP outpost)
--   `AUTHENTIK_LISTEN__METRICS`: Listening port for Prometheus metrics (All)
--   `AUTHENTIK_LISTEN__DEBUG`: Listening port for Go Debugging metrics (All)
+-   `AUTHENTIK_LISTEN__HTTP`: Listening address:port (e.g. `0.0.0.0:9000`) for HTTP (Server and Proxy outpost)
+-   `AUTHENTIK_LISTEN__HTTPS`: Listening address:port (e.g. `0.0.0.0:9443`) for HTTPS (Server and Proxy outpost)
+-   `AUTHENTIK_LISTEN__LDAP`: Listening address:port (e.g. `0.0.0.0:3389`) for LDAP (LDAP outpost)
+-   `AUTHENTIK_LISTEN__LDAPS`: Listening address:port (e.g. `0.0.0.0:6636`) for LDAPS (LDAP outpost)
+-   `AUTHENTIK_LISTEN__METRICS`: Listening address:port (e.g. `0.0.0.0:9300`) for Prometheus metrics (All)
+-   `AUTHENTIK_LISTEN__DEBUG`: Listening address:port (e.g. `0.0.0.0:9900`) for Go Debugging metrics (All)
 
 ## authentik Settings
 
@@ -233,12 +243,23 @@ Allows configuration of TLS Cliphers for LDAP connections used by LDAP sources. 
 
 Defaults to `null`.
 
-## Debugging
+### `AUTHENTIK_WEB__WORKERS`
 
-To check if your config has been applied correctly, you can run the following command to output the full config:
+:::info
+Requires authentik 2022.9
+:::
 
-```
-docker-compose run --rm worker dump_config
-# Or for kubernetes
-kubectl exec -it deployment/authentik-worker -c authentik -- ak dump_config
-```
+Configure how many gunicorn worker processes should be started (see https://docs.gunicorn.org/en/stable/design.html).
+
+If running in Kubernetes, the default value is set to 2 and should in most cases not be changed, as scaling can be done with multiple pods running the web server.
+Otherwise, authentik will use 1 worker for each 4 CPU cores + 1 as a value below 2 workers is not recommended.
+
+### `AUTHENTIK_WEB__THREADS`
+
+:::info
+Requires authentik 2022.9
+:::
+
+Configure how many gunicorn threads a worker processes should have (see https://docs.gunicorn.org/en/stable/design.html).
+
+Defaults to 4.

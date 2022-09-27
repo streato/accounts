@@ -7,6 +7,10 @@ slug: "xxxx.x"
 
 ## New features
 
+## API Changes
+
+_Insert output of `make gen-diff` here_
+
 ## Minor changes/fixes
 
 ## Upgrading

@@ -1,14 +1,13 @@
-import { EVENT_REFRESH } from "@goauthentik/web/constants";
-import "@goauthentik/web/elements/LoadingOverlay";
-import { ModalButton } from "@goauthentik/web/elements/buttons/ModalButton";
-import "@goauthentik/web/elements/buttons/SpinnerButton";
+import { EVENT_REFRESH } from "@goauthentik/common/constants";
+import "@goauthentik/elements/LoadingOverlay";
+import { ModalButton } from "@goauthentik/elements/buttons/ModalButton";
+import "@goauthentik/elements/buttons/SpinnerButton";
+import { Form } from "@goauthentik/elements/forms/Form";
 
 import { t } from "@lingui/macro";
 
 import { TemplateResult, html } from "lit";
 import { customElement, property } from "lit/decorators.js";
-
-import { Form } from "./Form";
 
 @customElement("ak-forms-modal")
 export class ModalForm extends ModalButton {
@@ -24,7 +23,7 @@ export class ModalForm extends ModalButton {
     @property({ type: String })
     cancelText = t`Cancel`;
 
-    confirm(): Promise<void> {
+    async confirm(): Promise<void> {
         const form = this.querySelector<Form<unknown>>("[slot=form]");
         if (!form) {
             return Promise.reject(t`No form found`);
