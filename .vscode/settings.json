@@ -22,7 +22,9 @@
     "python.formatting.provider": "black",
     "yaml.customTags": [
         "!Find sequence",
-        "!KeyOf scalar"
+        "!KeyOf scalar",
+        "!Context scalar",
+        "!Format sequence"
     ],
     "typescript.preferences.importModuleSpecifier": "non-relative",
     "typescript.preferences.importModuleSpecifierEnding": "index",
@@ -30,5 +32,13 @@
     "typescript.enablePromptUseWorkspaceTsdk": true,
     "yaml.schemas": {
         "./blueprints/schema.json": "blueprints/**/*.yaml"
-    }
+    },
+    "gitlens.autolinks": [
+        {
+            "alphanumeric": true,
+            "prefix": "#<num>",
+            "url": "https://github.com/goauthentik/authentik/issues/<num>",
+            "ignoreCase": false
+        }
+    ]
 }

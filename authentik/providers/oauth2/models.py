@@ -2,9 +2,8 @@
 import base64
 import binascii
 import json
-import time
 from dataclasses import asdict, dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from hashlib import sha256
 from typing import Any, Optional
 from urllib.parse import urlparse, urlunparse
@@ -14,21 +13,27 @@ from cryptography.hazmat.primitives.asymmetric.rsa import RSAPrivateKey
 from dacite.core import from_dict
 from django.db import models
 from django.http import HttpRequest
-from django.utils import dateformat, timezone
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from jwt import encode
 from rest_framework.serializers import Serializer
 
 from authentik.core.models import ExpiringModel, PropertyMapping, Provider, User
 from authentik.crypto.models import CertificateKeyPair
-from authentik.events.models import Event, EventAction
-from authentik.events.utils import get_user
-from authentik.lib.generators import generate_id, generate_key
+from authentik.events.models import Event
+from authentik.events.signals import SESSION_LOGIN_EVENT
+from authentik.lib.generators import generate_code_fixed_length, generate_id, generate_key
 from authentik.lib.models import SerializerModel
-from authentik.lib.utils.time import timedelta_from_string, timedelta_string_validator
+from authentik.lib.utils.time import timedelta_string_validator
 from authentik.providers.oauth2.apps import AuthentikProviderOAuth2Config
-from authentik.providers.oauth2.constants import ACR_AUTHENTIK_DEFAULT
+from authentik.providers.oauth2.constants import (
+    ACR_AUTHENTIK_DEFAULT,
+    AMR_MFA,
+    AMR_PASSWORD,
+    AMR_WEBAUTHN,
+)
 from authentik.sources.oauth.models import OAuthSource
+from authentik.stages.password.stage import PLAN_CONTEXT_METHOD, PLAN_CONTEXT_METHOD_ARGS
 
 
 class ClientTypes(models.TextChoices):
@@ -237,14 +242,18 @@ class OAuth2Provider(Provider):
     )
 
     def create_refresh_token(
-        self, user: User, scope: list[str], request: HttpRequest
+        self,
+        user: User,
+        scope: list[str],
+        request: HttpRequest,
+        expiry: timedelta,
     ) -> "RefreshToken":
         """Create and populate a RefreshToken object."""
         token = RefreshToken(
             user=user,
             provider=self,
             refresh_token=base64.urlsafe_b64encode(generate_key().encode()).decode(),
-            expires=timezone.now() + timedelta_from_string(self.token_validity),
+            expires=timezone.now() + expiry,
             scope=scope,
         )
         token.access_token = token.create_access_token(user, request)
@@ -320,8 +329,8 @@ class BaseGrantModel(models.Model):
 
     provider = models.ForeignKey(OAuth2Provider, on_delete=models.CASCADE)
     user = models.ForeignKey(User, verbose_name=_("User"), on_delete=models.CASCADE)
-    _scope = models.TextField(default="", verbose_name=_("Scopes"))
     revoked = models.BooleanField(default=False)
+    _scope = models.TextField(default="", verbose_name=_("Scopes"))
 
     @property
     def scope(self) -> list[str]:
@@ -389,9 +398,9 @@ class IDToken:
     iat: Optional[int] = None
     auth_time: Optional[int] = None
     acr: Optional[str] = ACR_AUTHENTIK_DEFAULT
+    amr: Optional[list[str]] = None
 
     c_hash: Optional[str] = None
-
     nonce: Optional[str] = None
     at_hash: Optional[str] = None
 
@@ -399,10 +408,18 @@ class IDToken:
 
     def to_dict(self) -> dict[str, Any]:
         """Convert dataclass to dict, and update with keys from `claims`"""
-        dic = asdict(self)
-        dic.pop("claims")
-        dic.update(self.claims)
-        return dic
+        id_dict = asdict(self)
+        # The following claims should be omitted if they aren't set instead of being
+        # set to null
+        if not self.at_hash:
+            id_dict.pop("at_hash")
+        if not self.nonce:
+            id_dict.pop("nonce")
+        if not self.c_hash:
+            id_dict.pop("c_hash")
+        id_dict.pop("claims")
+        id_dict.update(self.claims)
+        return id_dict
 
 
 class RefreshToken(SerializerModel, ExpiringModel, BaseGrantModel):
@@ -456,6 +473,7 @@ class RefreshToken(SerializerModel, ExpiringModel, BaseGrantModel):
         token["uid"] = generate_key()
         return self.provider.encode(token)
 
+    # pylint: disable=too-many-locals
     def create_id_token(self, user: User, request: HttpRequest) -> IDToken:
         """Creates the id_token.
         See: http://openid.net/specs/openid-connect-core-1_0.html#IDToken"""
@@ -475,20 +493,29 @@ class RefreshToken(SerializerModel, ExpiringModel, BaseGrantModel):
                     f"selected: {self.provider.sub_mode}"
                 )
             )
-
+        amr = []
         # Convert datetimes into timestamps.
-        now = int(time.time())
-        iat_time = now
-        exp_time = int(dateformat.format(self.expires, "U"))
+        now = datetime.now()
+        iat_time = int(now.timestamp())
+        exp_time = int(self.expires.timestamp())
         # We use the timestamp of the user's last successful login (EventAction.LOGIN) for auth_time
-        auth_events = Event.objects.filter(action=EventAction.LOGIN, user=get_user(user)).order_by(
-            "-created"
-        )
         # Fallback in case we can't find any login events
-        auth_time = datetime.now()
-        if auth_events.exists():
-            auth_time = auth_events.first().created
-        auth_time = int(dateformat.format(auth_time, "U"))
+        auth_time = now
+        if SESSION_LOGIN_EVENT in request.session:
+            auth_event: Event = request.session[SESSION_LOGIN_EVENT]
+            auth_time = auth_event.created
+            # Also check which method was used for authentication
+            method = auth_event.context.get(PLAN_CONTEXT_METHOD, "")
+            method_args = auth_event.context.get(PLAN_CONTEXT_METHOD_ARGS, {})
+            if method == "password":
+                amr.append(AMR_PASSWORD)
+            if method == "auth_webauthn_pwl":
+                amr.append(AMR_WEBAUTHN)
+            if "mfa_devices" in method_args:
+                if len(amr) > 0:
+                    amr.append(AMR_MFA)
+
+        auth_timestamp = int(auth_time.timestamp())
 
         token = IDToken(
             iss=self.provider.get_issuer(request),
@@ -496,7 +523,7 @@ class RefreshToken(SerializerModel, ExpiringModel, BaseGrantModel):
             aud=self.provider.client_id,
             exp=exp_time,
             iat=iat_time,
-            auth_time=auth_time,
+            auth_time=auth_timestamp,
         )
 
         # Include (or not) user standard claims in the id_token.
@@ -509,3 +536,31 @@ class RefreshToken(SerializerModel, ExpiringModel, BaseGrantModel):
             token.claims = claims
 
         return token
+
+
+class DeviceToken(ExpiringModel):
+    """Device token for OAuth device flow"""
+
+    user = models.ForeignKey(
+        "authentik_core.User", default=None, on_delete=models.CASCADE, null=True
+    )
+    provider = models.ForeignKey(OAuth2Provider, on_delete=models.CASCADE)
+    device_code = models.TextField(default=generate_key)
+    user_code = models.TextField(default=generate_code_fixed_length)
+    _scope = models.TextField(default="", verbose_name=_("Scopes"))
+
+    @property
+    def scope(self) -> list[str]:
+        """Return scopes as list of strings"""
+        return self._scope.split()
+
+    @scope.setter
+    def scope(self, value):
+        self._scope = " ".join(value)
+
+    class Meta:
+        verbose_name = _("Device Token")
+        verbose_name_plural = _("Device Tokens")
+
+    def __str__(self):
+        return f"Device Token for {self.provider}"

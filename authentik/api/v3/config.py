@@ -28,12 +28,14 @@ class Capabilities(models.TextChoices):
     CAN_SAVE_MEDIA = "can_save_media"
     CAN_GEO_IP = "can_geo_ip"
     CAN_IMPERSONATE = "can_impersonate"
+    CAN_DEBUG = "can_debug"
 
 
 class ErrorReportingConfigSerializer(PassiveSerializer):
     """Config for error reporting"""
 
     enabled = BooleanField(read_only=True)
+    sentry_dsn = CharField(read_only=True)
     environment = CharField(read_only=True)
     send_pii = BooleanField(read_only=True)
     traces_sample_rate = FloatField(read_only=True)
@@ -66,6 +68,8 @@ class ConfigView(APIView):
             caps.append(Capabilities.CAN_GEO_IP)
         if CONFIG.y_bool("impersonation"):
             caps.append(Capabilities.CAN_IMPERSONATE)
+        if settings.DEBUG:
+            caps.append(Capabilities.CAN_DEBUG)
         return caps
 
     def get_config(self) -> ConfigSerializer:
@@ -74,6 +78,7 @@ class ConfigView(APIView):
             {
                 "error_reporting": {
                     "enabled": CONFIG.y("error_reporting.enabled"),
+                    "sentry_dsn": CONFIG.y("error_reporting.sentry_dsn"),
                     "environment": CONFIG.y("error_reporting.environment"),
                     "send_pii": CONFIG.y("error_reporting.send_pii"),
                     "traces_sample_rate": float(CONFIG.y("error_reporting.sample_rate", 0.4)),

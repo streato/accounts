@@ -5,10 +5,10 @@ go 1.18
 require (
 	github.com/Netflix/go-env v0.0.0-20210215222557-e437a7e7f9fb
 	github.com/coreos/go-oidc v2.2.1+incompatible
-	github.com/getsentry/sentry-go v0.13.0
+	github.com/getsentry/sentry-go v0.15.0
 	github.com/go-http-utils/etag v0.0.0-20161124023236-513ea8f21eb1
 	github.com/go-ldap/ldap/v3 v3.4.4
-	github.com/go-openapi/runtime v0.24.1
+	github.com/go-openapi/runtime v0.24.2
 	github.com/go-openapi/strfmt v0.21.3
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/uuid v1.3.0
@@ -21,11 +21,11 @@ require (
 	github.com/nmcclain/asn1-ber v0.0.0-20170104154839-2661553a0484
 	github.com/nmcclain/ldap v0.0.0-20210720162743-7f8d1e44eeba
 	github.com/pires/go-proxyproto v0.6.2
-	github.com/prometheus/client_golang v1.13.0
+	github.com/prometheus/client_golang v1.14.0
 	github.com/quasoft/memstore v0.0.0-20191010062613-2bce066d2b0b
 	github.com/sirupsen/logrus v1.9.0
-	github.com/stretchr/testify v1.8.0
-	goauthentik.io/api/v3 v3.2022090.1
+	github.com/stretchr/testify v1.8.1
+	goauthentik.io/api/v3 v3.2022111.1
 	golang.org/x/oauth2 v0.0.0-20220223155221-ee480838109b
 	golang.org/x/sync v0.0.0-20220601150217-0de741cfad7f
 	gopkg.in/boj/redistore.v1 v1.0.0-20160128113310-fc113767cd6b
@@ -62,13 +62,13 @@ require (
 	github.com/opentracing/opentracing-go v1.2.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/pquerna/cachecontrol v0.0.0-20201205024021-ac21108117ac // indirect
-	github.com/prometheus/client_model v0.2.0 // indirect
+	github.com/prometheus/client_model v0.3.0 // indirect
 	github.com/prometheus/common v0.37.0 // indirect
 	github.com/prometheus/procfs v0.8.0 // indirect
 	go.mongodb.org/mongo-driver v1.10.0 // indirect
-	golang.org/x/crypto v0.0.0-20220622213112-05595931fe9d // indirect
-	golang.org/x/net v0.0.0-20220225172249-27dd8689420f // indirect
-	golang.org/x/sys v0.0.0-20220715151400-c0bba94af5f8 // indirect
+	golang.org/x/crypto v0.0.0-20220926161630-eccd6366d1be // indirect
+	golang.org/x/net v0.0.0-20221002022538-bcab6841153b // indirect
+	golang.org/x/sys v0.0.0-20220928140112-f11e5e49a4ec // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect

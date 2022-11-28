@@ -44,6 +44,7 @@ from authentik.flows.models import (
     Stage,
 )
 from authentik.flows.planner import (
+    CACHE_PREFIX,
     PLAN_CONTEXT_IS_RESTORED,
     PLAN_CONTEXT_PENDING_USER,
     PLAN_CONTEXT_REDIRECT,
@@ -216,7 +217,7 @@ class FlowExecutorView(APIView):
                 self._logger.warning(
                     "f(exec): found incompatible flow plan, invalidating run", exc=exc
                 )
-                keys = cache.keys("flow_*")
+                keys = cache.keys(f"{CACHE_PREFIX}*")
                 cache.delete_many(keys)
                 return self.stage_invalid()
             if not next_binding:
@@ -253,9 +254,9 @@ class FlowExecutorView(APIView):
             action=EventAction.SYSTEM_EXCEPTION,
             message=exception_to_string(exc),
         ).from_http(self.request)
-        return to_stage_response(
-            self.request, HttpChallengeResponse(FlowErrorChallenge(self.request, exc))
-        )
+        challenge = FlowErrorChallenge(self.request, exc)
+        challenge.is_valid()
+        return to_stage_response(self.request, HttpChallengeResponse(challenge))
 
     @extend_schema(
         responses={
@@ -351,7 +352,7 @@ class FlowExecutorView(APIView):
             # from the cache. If there are errors, just delete all cached flows
             _ = plan.has_stages
         except Exception:  # pylint: disable=broad-except
-            keys = cache.keys("flow_*")
+            keys = cache.keys(f"{CACHE_PREFIX}*")
             cache.delete_many(keys)
             return self._initiate_plan()
         return plan

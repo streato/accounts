@@ -47,7 +47,10 @@ module.exports = {
                         type: "doc",
                         id: "providers/oauth2/index",
                     },
-                    items: ["providers/oauth2/client_credentials"],
+                    items: [
+                        "providers/oauth2/client_credentials",
+                        "providers/oauth2/device_code",
+                    ],
                 },
                 "providers/saml",
                 {
@@ -62,7 +65,15 @@ module.exports = {
                         "providers/proxy/forward_auth",
                     ],
                 },
-                "providers/ldap",
+                {
+                    type: "category",
+                    label: "LDAP Provider",
+                    link: {
+                        type: "doc",
+                        id: "providers/ldap/index",
+                    },
+                    items: ["providers/ldap/generic_setup"],
+                },
             ],
         },
         {
@@ -206,13 +217,15 @@ module.exports = {
                 description: "Release notes for recent authentik versions",
             },
             items: [
+                "releases/v2022.11",
+                "releases/v2022.10",
                 "releases/v2022.9",
-                "releases/v2022.8",
-                "releases/v2022.7",
                 {
                     type: "category",
                     label: "Previous versions",
                     items: [
+                        "releases/v2022.8",
+                        "releases/v2022.7",
                         "releases/v2022.6",
                         "releases/v2022.5",
                         "releases/v2022.4",
@@ -268,6 +281,16 @@ module.exports = {
                 "troubleshooting/missing_permission",
                 "troubleshooting/missing_admin_group",
             ],
+        },
+        {
+            type: "category",
+            label: "Security",
+            link: {
+                type: "generated-index",
+                title: "Security",
+                slug: "security",
+            },
+            items: ["security/policy"],
         },
     ],
 };

@@ -36,6 +36,7 @@ import PFTitle from "@patternfly/patternfly/components/Title/title.css";
 import PFBase from "@patternfly/patternfly/patternfly-base.css";
 
 import {
+    CapabilitiesEnum,
     ChallengeChoices,
     ChallengeTypes,
     CurrentTenant,
@@ -154,7 +155,11 @@ export class FlowExecutor extends AKElement implements StageHost {
         super();
         this.ws = new WebsocketClient();
         this.flowSlug = window.location.pathname.split("/")[3];
-        this.inspectorOpen = window.location.search.includes("inspector");
+        this.inspectorOpen =
+            globalAK()?.config.capabilities.includes(CapabilitiesEnum.Debug) || false;
+        if (window.location.search.includes("inspector")) {
+            this.inspectorOpen = !this.inspectorOpen;
+        }
         tenant().then((tenant) => (this.tenant = tenant));
     }
 
@@ -357,18 +362,32 @@ export class FlowExecutor extends AKElement implements StageHost {
                     .host=${this as StageHost}
                     .challenge=${this.challenge}
                 ></ak-stage-authenticator-validate>`;
-            case "ak-flow-sources-plex":
+            // Sources
+            case "ak-source-plex":
                 await import("@goauthentik/flow/sources/plex/PlexLoginInit");
-                return html`<ak-flow-sources-plex
+                return html`<ak-flow-source-plex
                     .host=${this as StageHost}
                     .challenge=${this.challenge}
-                ></ak-flow-sources-plex>`;
-            case "ak-flow-sources-oauth-apple":
+                ></ak-flow-source-plex>`;
+            case "ak-source-oauth-apple":
                 await import("@goauthentik/flow/sources/apple/AppleLoginInit");
-                return html`<ak-flow-sources-oauth-apple
+                return html`<ak-flow-source-oauth-apple
                     .host=${this as StageHost}
                     .challenge=${this.challenge}
-                ></ak-flow-sources-oauth-apple>`;
+                ></ak-flow-source-oauth-apple>`;
+            // Providers
+            case "ak-provider-oauth2-device-code":
+                await import("@goauthentik/flow/providers/oauth2/DeviceCode");
+                return html`<ak-flow-provider-oauth2-code
+                    .host=${this as StageHost}
+                    .challenge=${this.challenge}
+                ></ak-flow-provider-oauth2-code>`;
+            case "ak-provider-oauth2-device-code-finish":
+                await import("@goauthentik/flow/providers/oauth2/DeviceCodeFinish");
+                return html`<ak-flow-provider-oauth2-code-finish
+                    .host=${this as StageHost}
+                    .challenge=${this.challenge}
+                ></ak-flow-provider-oauth2-code-finish>`;
             default:
                 break;
         }
@@ -515,7 +534,7 @@ export class FlowExecutor extends AKElement implements StageHost {
                                                     ? html`
                                                           <li>
                                                               <a
-                                                                  href="https://unsplash.com/@impatrickt"
+                                                                  href="https://unsplash.com/@victorene"
                                                                   >${t`Background image`}</a
                                                               >
                                                           </li>

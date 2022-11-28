@@ -1,12 +1,12 @@
 openapi: 3.0.3
 info:
   title: authentik
-  version: 2022.9.0
+  version: 2022.11.1
   description: Making authentication simple.
   contact:
     email: hello@goauthentik.io
   license:
-    name: GNU GPLv3
+    name: MIT
     url: https://github.com/goauthentik/authentik/blob/main/LICENSE
 paths:
   /admin/apps/:
@@ -3530,6 +3530,11 @@ paths:
           type: string
           format: uuid
       - in: query
+        name: flow_device_code
+        schema:
+          type: string
+          format: uuid
+      - in: query
         name: flow_invalidation
         schema:
           type: string
@@ -4923,6 +4928,11 @@ paths:
         schema:
           type: boolean
         description: Only return certificate-key pairs with keys
+      - in: query
+        name: include_details
+        schema:
+          type: boolean
+          default: true
       - in: query
         name: managed
         schema:
@@ -7506,9 +7516,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericError'
           description: ''
-  /flows/instances/import_flow/:
+  /flows/instances/import/:
     post:
-      operationId: flows_instances_import_flow_create
+      operationId: flows_instances_import_create
       description: Import flow from .yaml file
       tags:
       - flows
@@ -7521,9 +7531,17 @@ paths:
       - authentik: []
       responses:
         '204':
-          description: Successfully imported flow
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlowImportResult'
+          description: ''
         '400':
-          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlowImportResult'
+          description: ''
         '403':
           content:
             application/json:
@@ -11417,6 +11435,18 @@ paths:
         schema:
           type: integer
       - in: query
+        name: check_have_i_been_pwned
+        schema:
+          type: boolean
+      - in: query
+        name: check_static_rules
+        schema:
+          type: boolean
+      - in: query
+        name: check_zxcvbn
+        schema:
+          type: boolean
+      - in: query
         name: created
         schema:
           type: string
@@ -11429,6 +11459,10 @@ paths:
         name: execution_logging
         schema:
           type: boolean
+      - in: query
+        name: hibp_allowed_count
+        schema:
+          type: integer
       - in: query
         name: last_updated
         schema:
@@ -11479,6 +11513,10 @@ paths:
         name: symbol_charset
         schema:
           type: string
+      - in: query
+        name: zxcvbn_score_threshold
+        schema:
+          type: integer
       tags:
       - policies
       security:
@@ -11512,7 +11550,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PasswordPolicyRequest'
-        required: true
       security:
       - authentik: []
       responses:
@@ -11587,7 +11624,6 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/PasswordPolicyRequest'
-        required: true
       security:
       - authentik: []
       responses:
@@ -13091,7 +13127,7 @@ paths:
         schema:
           type: string
           format: uuid
-        description: A UUID string identifying this Notification Webhook Mapping.
+        description: A UUID string identifying this Webhook Mapping.
         required: true
       tags:
       - propertymappings
@@ -13125,7 +13161,7 @@ paths:
         schema:
           type: string
           format: uuid
-        description: A UUID string identifying this Notification Webhook Mapping.
+        description: A UUID string identifying this Webhook Mapping.
         required: true
       tags:
       - propertymappings
@@ -13165,7 +13201,7 @@ paths:
         schema:
           type: string
           format: uuid
-        description: A UUID string identifying this Notification Webhook Mapping.
+        description: A UUID string identifying this Webhook Mapping.
         required: true
       tags:
       - propertymappings
@@ -13204,7 +13240,7 @@ paths:
         schema:
           type: string
           format: uuid
-        description: A UUID string identifying this Notification Webhook Mapping.
+        description: A UUID string identifying this Webhook Mapping.
         required: true
       tags:
       - propertymappings
@@ -13235,7 +13271,7 @@ paths:
         schema:
           type: string
           format: uuid
-        description: A UUID string identifying this Notification Webhook Mapping.
+        description: A UUID string identifying this Webhook Mapping.
         required: true
       tags:
       - propertymappings
@@ -15759,6 +15795,69 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericError'
           description: ''
+  /sources/all/{slug}/set_icon/:
+    post:
+      operationId: sources_all_set_icon_create
+      description: Set source icon
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+          description: Internal source name, used in URLs.
+        required: true
+      tags:
+      - sources
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FileUploadRequest'
+      security:
+      - authentik: []
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericError'
+          description: ''
+  /sources/all/{slug}/set_icon_url/:
+    post:
+      operationId: sources_all_set_icon_url_create
+      description: Set source icon (as URL)
+      parameters:
+      - in: path
+        name: slug
+        schema:
+          type: string
+          description: Internal source name, used in URLs.
+        required: true
+      tags:
+      - sources
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FilePathRequest'
+        required: true
+      security:
+      - authentik: []
+      responses:
+        '200':
+          description: Success
+        '400':
+          description: Bad request
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericError'
+          description: ''
   /sources/all/{slug}/used_by/:
     get:
       operationId: sources_all_used_by_list
@@ -17057,20 +17156,6 @@ paths:
         schema:
           type: integer
       - in: query
-        name: pbm_uuid
-        schema:
-          type: string
-          format: uuid
-      - in: query
-        name: policies
-        schema:
-          type: array
-          items:
-            type: string
-            format: uuid
-        explode: true
-        style: form
-      - in: query
         name: policy_engine_mode
         schema:
           type: string
@@ -17082,15 +17167,6 @@ paths:
         schema:
           type: string
           format: uuid
-      - in: query
-        name: property_mappings
-        schema:
-          type: array
-          items:
-            type: string
-            format: uuid
-        explode: true
-        style: form
       - name: search
         required: false
         in: query
@@ -17140,10 +17216,6 @@ paths:
           - username_link
         description: How the source determines if an existing user should be authenticated
           or a new user enrolled.
-      - in: query
-        name: user_path_template
-        schema:
-          type: string
       tags:
       - sources
       security:
@@ -18154,6 +18226,270 @@ paths:
               schema:
                 $ref: '#/components/schemas/GenericError'
           description: ''
+  /sources/user_connections/saml/:
+    get:
+      operationId: sources_user_connections_saml_list
+      description: Source Viewset
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: source__slug
+        schema:
+          type: string
+      tags:
+      - sources
+      security:
+      - authentik: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserSAMLSourceConnectionList'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericError'
+          description: ''
+    post:
+      operationId: sources_user_connections_saml_create
+      description: Source Viewset
+      tags:
+      - sources
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSAMLSourceConnectionRequest'
+        required: true
+      security:
+      - authentik: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSAMLSourceConnection'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericError'
+          description: ''
+  /sources/user_connections/saml/{id}/:
+    get:
+      operationId: sources_user_connections_saml_retrieve
+      description: Source Viewset
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this User SAML Source Connection.
+        required: true
+      tags:
+      - sources
+      security:
+      - authentik: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSAMLSourceConnection'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericError'
+          description: ''
+    put:
+      operationId: sources_user_connections_saml_update
+      description: Source Viewset
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this User SAML Source Connection.
+        required: true
+      tags:
+      - sources
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSAMLSourceConnectionRequest'
+        required: true
+      security:
+      - authentik: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSAMLSourceConnection'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericError'
+          description: ''
+    patch:
+      operationId: sources_user_connections_saml_partial_update
+      description: Source Viewset
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this User SAML Source Connection.
+        required: true
+      tags:
+      - sources
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserSAMLSourceConnectionRequest'
+      security:
+      - authentik: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSAMLSourceConnection'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericError'
+          description: ''
+    delete:
+      operationId: sources_user_connections_saml_destroy
+      description: Source Viewset
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this User SAML Source Connection.
+        required: true
+      tags:
+      - sources
+      security:
+      - authentik: []
+      responses:
+        '204':
+          description: No response body
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericError'
+          description: ''
+  /sources/user_connections/saml/{id}/used_by/:
+    get:
+      operationId: sources_user_connections_saml_used_by_list
+      description: Get a list of all objects that use this object
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this User SAML Source Connection.
+        required: true
+      tags:
+      - sources
+      security:
+      - authentik: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UsedBy'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericError'
+          description: ''
   /stages/all/:
     get:
       operationId: stages_all_list
@@ -18784,6 +19120,11 @@ paths:
         name: from_number
         schema:
           type: string
+      - in: query
+        name: mapping
+        schema:
+          type: string
+          format: uuid
       - in: query
         name: name
         schema:
@@ -24611,7 +24952,7 @@ components:
         component:
           type: string
           minLength: 1
-          default: ak-flow-sources-oauth-apple
+          default: ak-source-oauth-apple
     AppleLoginChallenge:
       type: object
       description: Special challenge for apple-native authentication flow, which happens
@@ -24623,7 +24964,7 @@ components:
           $ref: '#/components/schemas/ContextualFlowInfo'
         component:
           type: string
-          default: ak-flow-sources-oauth-apple
+          default: ak-source-oauth-apple
         response_errors:
           type: object
           additionalProperties:
@@ -24762,7 +25103,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
         configure_flow:
           type: string
           format: uuid
@@ -24794,7 +25135,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         configure_flow:
           type: string
           format: uuid
@@ -25001,7 +25342,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
         configure_flow:
           type: string
           format: uuid
@@ -25057,7 +25398,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         configure_flow:
           type: string
           format: uuid
@@ -25151,7 +25492,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
         configure_flow:
           type: string
           format: uuid
@@ -25175,6 +25516,11 @@ components:
           description: When enabled, the Phone number is only used during enrollment
             to verify the users authenticity. Only a hash of the phone number is saved
             to ensure it is not re-used in the future.
+        mapping:
+          type: string
+          format: uuid
+          nullable: true
+          description: Optionally modify the payload being sent to custom providers.
       required:
       - account_sid
       - auth
@@ -25196,7 +25542,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         configure_flow:
           type: string
           format: uuid
@@ -25223,6 +25569,11 @@ components:
           description: When enabled, the Phone number is only used during enrollment
             to verify the users authenticity. Only a hash of the phone number is saved
             to ensure it is not re-used in the future.
+        mapping:
+          type: string
+          format: uuid
+          nullable: true
+          description: Optionally modify the payload being sent to custom providers.
       required:
       - account_sid
       - auth
@@ -25293,7 +25644,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
         configure_flow:
           type: string
           format: uuid
@@ -25321,7 +25672,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         configure_flow:
           type: string
           format: uuid
@@ -25400,7 +25751,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
         configure_flow:
           type: string
           format: uuid
@@ -25430,7 +25781,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         configure_flow:
           type: string
           format: uuid
@@ -25471,7 +25822,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
         not_configured_action:
           $ref: '#/components/schemas/NotConfiguredActionEnum'
         device_classes:
@@ -25491,6 +25842,10 @@ components:
           type: string
           description: If any of the user's device has been used within this threshold,
             this stage will be skipped
+        webauthn_user_verification:
+          allOf:
+          - $ref: '#/components/schemas/UserVerificationEnum'
+          description: Enforce user verification for WebAuthn devices.
       required:
       - component
       - meta_model_name
@@ -25508,7 +25863,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         not_configured_action:
           $ref: '#/components/schemas/NotConfiguredActionEnum'
         device_classes:
@@ -25529,6 +25884,10 @@ components:
           minLength: 1
           description: If any of the user's device has been used within this threshold,
             this stage will be skipped
+        webauthn_user_verification:
+          allOf:
+          - $ref: '#/components/schemas/UserVerificationEnum'
+          description: Enforce user verification for WebAuthn devices.
       required:
       - name
     AuthenticatorValidationChallenge:
@@ -25784,6 +26143,7 @@ components:
       - can_save_media
       - can_geo_ip
       - can_impersonate
+      - can_debug
       type: string
     CaptchaChallenge:
       type: object
@@ -25852,7 +26212,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
         public_key:
           type: string
           description: Public key, acquired from https://www.google.com/recaptcha/intro/v3.html
@@ -25874,7 +26234,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         public_key:
           type: string
           minLength: 1
@@ -25924,16 +26284,20 @@ components:
           type: string
         fingerprint_sha256:
           type: string
+          nullable: true
           readOnly: true
         fingerprint_sha1:
           type: string
+          nullable: true
           readOnly: true
         cert_expiry:
           type: string
           format: date-time
+          nullable: true
           readOnly: true
         cert_subject:
           type: string
+          nullable: true
           readOnly: true
         private_key_available:
           type: boolean
@@ -26019,6 +26383,8 @@ components:
       - $ref: '#/components/schemas/EmailChallenge'
       - $ref: '#/components/schemas/FlowErrorChallenge'
       - $ref: '#/components/schemas/IdentificationChallenge'
+      - $ref: '#/components/schemas/OAuthDeviceCodeChallenge'
+      - $ref: '#/components/schemas/OAuthDeviceCodeFinishChallenge'
       - $ref: '#/components/schemas/PasswordChallenge'
       - $ref: '#/components/schemas/PlexAuthenticationChallenge'
       - $ref: '#/components/schemas/PromptChallenge'
@@ -26028,7 +26394,7 @@ components:
         propertyName: component
         mapping:
           ak-stage-access-denied: '#/components/schemas/AccessDeniedChallenge'
-          ak-flow-sources-oauth-apple: '#/components/schemas/AppleLoginChallenge'
+          ak-source-oauth-apple: '#/components/schemas/AppleLoginChallenge'
           ak-stage-authenticator-duo: '#/components/schemas/AuthenticatorDuoChallenge'
           ak-stage-authenticator-sms: '#/components/schemas/AuthenticatorSMSChallenge'
           ak-stage-authenticator-static: '#/components/schemas/AuthenticatorStaticChallenge'
@@ -26042,8 +26408,10 @@ components:
           ak-stage-email: '#/components/schemas/EmailChallenge'
           xak-flow-error: '#/components/schemas/FlowErrorChallenge'
           ak-stage-identification: '#/components/schemas/IdentificationChallenge'
+          ak-provider-oauth2-device-code: '#/components/schemas/OAuthDeviceCodeChallenge'
+          ak-provider-oauth2-device-code-finish: '#/components/schemas/OAuthDeviceCodeFinishChallenge'
           ak-stage-password: '#/components/schemas/PasswordChallenge'
-          ak-flow-sources-plex: '#/components/schemas/PlexAuthenticationChallenge'
+          ak-source-plex: '#/components/schemas/PlexAuthenticationChallenge'
           ak-stage-prompt: '#/components/schemas/PromptChallenge'
           xak-flow-redirect: '#/components/schemas/RedirectChallenge'
           xak-flow-shell: '#/components/schemas/ShellChallenge'
@@ -26156,7 +26524,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
         mode:
           $ref: '#/components/schemas/ConsentStageModeEnum'
         consent_expire_in:
@@ -26186,7 +26554,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         mode:
           $ref: '#/components/schemas/ConsentStageModeEnum'
         consent_expire_in:
@@ -26252,6 +26620,8 @@ components:
           type: string
         flow_user_settings:
           type: string
+        flow_device_code:
+          type: string
         default_locale:
           type: string
           readOnly: true
@@ -26294,7 +26664,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
       required:
       - component
       - meta_model_name
@@ -26312,7 +26682,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
       required:
       - name
     Device:
@@ -26603,7 +26973,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
       required:
       - component
       - meta_model_name
@@ -26621,7 +26991,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
       required:
       - name
     DuoDevice:
@@ -26718,7 +27088,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
         use_global_settings:
           type: boolean
           description: When enabled, global Email connection settings will be used
@@ -26772,7 +27142,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         use_global_settings:
           type: boolean
           description: When enabled, global Email connection settings will be used
@@ -26836,6 +27206,9 @@ components:
         enabled:
           type: boolean
           readOnly: true
+        sentry_dsn:
+          type: string
+          readOnly: true
         environment:
           type: string
           readOnly: true
@@ -26850,6 +27223,7 @@ components:
       - enabled
       - environment
       - send_pii
+      - sentry_dsn
       - traces_sample_rate
     Event:
       type: object
@@ -27231,13 +27605,15 @@ components:
       - $ref: '#/components/schemas/DummyChallengeResponseRequest'
       - $ref: '#/components/schemas/EmailChallengeResponseRequest'
       - $ref: '#/components/schemas/IdentificationChallengeResponseRequest'
+      - $ref: '#/components/schemas/OAuthDeviceCodeChallengeResponseRequest'
+      - $ref: '#/components/schemas/OAuthDeviceCodeFinishChallengeResponseRequest'
       - $ref: '#/components/schemas/PasswordChallengeResponseRequest'
       - $ref: '#/components/schemas/PlexAuthenticationChallengeResponseRequest'
       - $ref: '#/components/schemas/PromptChallengeResponseRequest'
       discriminator:
         propertyName: component
         mapping:
-          ak-flow-sources-oauth-apple: '#/components/schemas/AppleChallengeResponseRequest'
+          ak-source-oauth-apple: '#/components/schemas/AppleChallengeResponseRequest'
           ak-stage-authenticator-duo: '#/components/schemas/AuthenticatorDuoChallengeResponseRequest'
           ak-stage-authenticator-sms: '#/components/schemas/AuthenticatorSMSChallengeResponseRequest'
           ak-stage-authenticator-static: '#/components/schemas/AuthenticatorStaticChallengeResponseRequest'
@@ -27250,8 +27626,10 @@ components:
           ak-stage-dummy: '#/components/schemas/DummyChallengeResponseRequest'
           ak-stage-email: '#/components/schemas/EmailChallengeResponseRequest'
           ak-stage-identification: '#/components/schemas/IdentificationChallengeResponseRequest'
+          ak-provider-oauth2-device-code: '#/components/schemas/OAuthDeviceCodeChallengeResponseRequest'
+          ak-provider-oauth2-device-code-finish: '#/components/schemas/OAuthDeviceCodeFinishChallengeResponseRequest'
           ak-stage-password: '#/components/schemas/PasswordChallengeResponseRequest'
-          ak-flow-sources-plex: '#/components/schemas/PlexAuthenticationChallengeResponseRequest'
+          ak-source-plex: '#/components/schemas/PlexAuthenticationChallengeResponseRequest'
           ak-stage-prompt: '#/components/schemas/PromptChallengeResponseRequest'
     FlowDesignationEnum:
       enum:
@@ -27306,6 +27684,22 @@ components:
       - pending_user_avatar
       - request_id
       - type
+    FlowImportResult:
+      type: object
+      description: Logs of an attempted flow import
+      properties:
+        logs:
+          type: array
+          items:
+            type: object
+            additionalProperties: {}
+          readOnly: true
+        success:
+          type: boolean
+          readOnly: true
+      required:
+      - logs
+      - success
     FlowInspection:
       type: object
       description: Serializer for inspect endpoint
@@ -27348,6 +27742,102 @@ components:
     FlowRequest:
       type: object
       description: Flow Serializer
+      properties:
+        name:
+          type: string
+          minLength: 1
+        slug:
+          type: string
+          minLength: 1
+          description: Visible in the URL.
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          minLength: 1
+          description: Shown as the Title in Flow pages.
+        designation:
+          allOf:
+          - $ref: '#/components/schemas/FlowDesignationEnum'
+          description: Decides what this Flow is used for. For example, the Authentication
+            flow is redirect to when an un-authenticated user visits authentik.
+        policy_engine_mode:
+          $ref: '#/components/schemas/PolicyEngineMode'
+        compatibility_mode:
+          type: boolean
+          description: Enable compatibility mode, increases compatibility with password
+            managers on mobile devices.
+        layout:
+          $ref: '#/components/schemas/LayoutEnum'
+        denied_action:
+          allOf:
+          - $ref: '#/components/schemas/DeniedActionEnum'
+          description: Configure what should happen when a flow denies access to a
+            user.
+      required:
+      - designation
+      - name
+      - slug
+      - title
+    FlowSet:
+      type: object
+      description: Stripped down flow serializer
+      properties:
+        pk:
+          type: string
+          format: uuid
+          readOnly: true
+          title: Flow uuid
+        policybindingmodel_ptr_id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+        slug:
+          type: string
+          description: Visible in the URL.
+          maxLength: 50
+          pattern: ^[-a-zA-Z0-9_]+$
+        title:
+          type: string
+          description: Shown as the Title in Flow pages.
+        designation:
+          allOf:
+          - $ref: '#/components/schemas/FlowDesignationEnum'
+          description: Decides what this Flow is used for. For example, the Authentication
+            flow is redirect to when an un-authenticated user visits authentik.
+        background:
+          type: string
+          readOnly: true
+        policy_engine_mode:
+          $ref: '#/components/schemas/PolicyEngineMode'
+        compatibility_mode:
+          type: boolean
+          description: Enable compatibility mode, increases compatibility with password
+            managers on mobile devices.
+        export_url:
+          type: string
+          readOnly: true
+        layout:
+          $ref: '#/components/schemas/LayoutEnum'
+        denied_action:
+          allOf:
+          - $ref: '#/components/schemas/DeniedActionEnum'
+          description: Configure what should happen when a flow denies access to a
+            user.
+      required:
+      - background
+      - designation
+      - export_url
+      - name
+      - pk
+      - policybindingmodel_ptr_id
+      - slug
+      - title
+    FlowSetRequest:
+      type: object
+      description: Stripped down flow serializer
       properties:
         name:
           type: string
@@ -27794,7 +28284,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
         user_fields:
           type: array
           items:
@@ -27858,7 +28348,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         user_fields:
           type: array
           items:
@@ -27996,7 +28486,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
         continue_flow_without_invitation:
           type: boolean
           description: If this flag is set, this Stage will jump to the next Stage
@@ -28019,7 +28509,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         continue_flow_without_invitation:
           type: boolean
           description: If this flag is set, this Stage will jump to the next Stage
@@ -28064,6 +28554,9 @@ components:
           additionalProperties: {}
           description: Paste your kubeconfig here. authentik will automatically use
             the currently selected context.
+        verify_ssl:
+          type: boolean
+          description: Verify SSL Certificates of the Kubernetes API endpoint
       required:
       - component
       - meta_model_name
@@ -28087,6 +28580,9 @@ components:
           additionalProperties: {}
           description: Paste your kubeconfig here. authentik will automatically use
             the currently selected context.
+        verify_ssl:
+          type: boolean
+          description: Verify SSL Certificates of the Kubernetes API endpoint
       required:
       - name
     LDAPAPIAccessMode:
@@ -28419,6 +28915,10 @@ components:
           readOnly: true
         user_path_template:
           type: string
+        icon:
+          type: string
+          nullable: true
+          readOnly: true
         server_uri:
           type: string
           format: uri
@@ -28481,6 +28981,7 @@ components:
       required:
       - base_dn
       - component
+      - icon
       - managed
       - meta_model_name
       - name
@@ -28623,8 +29124,8 @@ components:
         propertyName: component
         mapping:
           xak-flow-redirect: '#/components/schemas/RedirectChallenge'
-          ak-flow-sources-plex: '#/components/schemas/PlexAuthenticationChallenge'
-          ak-flow-sources-oauth-apple: '#/components/schemas/AppleLoginChallenge'
+          ak-source-plex: '#/components/schemas/PlexAuthenticationChallenge'
+          ak-source-oauth-apple: '#/components/schemas/AppleLoginChallenge'
     LoginMetrics:
       type: object
       description: Login Metrics per 1h
@@ -28639,7 +29140,13 @@ components:
           items:
             $ref: '#/components/schemas/Coordinate'
           readOnly: true
+        authorizations_per_1h:
+          type: array
+          items:
+            $ref: '#/components/schemas/Coordinate'
+          readOnly: true
       required:
+      - authorizations_per_1h
       - logins_failed_per_1h
       - logins_per_1h
     LoginSource:
@@ -29087,6 +29594,64 @@ components:
       - provider_info
       - token
       - user_info
+    OAuthDeviceCodeChallenge:
+      type: object
+      description: OAuth Device code challenge
+      properties:
+        type:
+          $ref: '#/components/schemas/ChallengeChoices'
+        flow_info:
+          $ref: '#/components/schemas/ContextualFlowInfo'
+        component:
+          type: string
+          default: ak-provider-oauth2-device-code
+        response_errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - type
+    OAuthDeviceCodeChallengeResponseRequest:
+      type: object
+      description: Response that includes the user-entered device code
+      properties:
+        component:
+          type: string
+          minLength: 1
+          default: ak-provider-oauth2-device-code
+        code:
+          type: integer
+      required:
+      - code
+    OAuthDeviceCodeFinishChallenge:
+      type: object
+      description: Final challenge after user enters their code
+      properties:
+        type:
+          $ref: '#/components/schemas/ChallengeChoices'
+        flow_info:
+          $ref: '#/components/schemas/ContextualFlowInfo'
+        component:
+          type: string
+          default: ak-provider-oauth2-device-code-finish
+        response_errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/ErrorDetail'
+      required:
+      - type
+    OAuthDeviceCodeFinishChallengeResponseRequest:
+      type: object
+      description: Response that device has been authenticated and tab can be closed
+      properties:
+        component:
+          type: string
+          minLength: 1
+          default: ak-provider-oauth2-device-code-finish
     OAuthSource:
       type: object
       description: OAuth Source Serializer
@@ -29146,6 +29711,10 @@ components:
           readOnly: true
         user_path_template:
           type: string
+        icon:
+          type: string
+          nullable: true
+          readOnly: true
         provider_type:
           $ref: '#/components/schemas/ProviderTypeEnum'
         request_token_url:
@@ -29191,6 +29760,7 @@ components:
       - callback_url
       - component
       - consumer_key
+      - icon
       - managed
       - meta_model_name
       - name
@@ -32092,6 +32662,41 @@ components:
       required:
       - pagination
       - results
+    PaginatedUserSAMLSourceConnectionList:
+      type: object
+      properties:
+        pagination:
+          type: object
+          properties:
+            next:
+              type: number
+            previous:
+              type: number
+            count:
+              type: number
+            current:
+              type: number
+            total_pages:
+              type: number
+            start_index:
+              type: number
+            end_index:
+              type: number
+          required:
+          - next
+          - previous
+          - count
+          - current
+          - total_pages
+          - start_index
+          - end_index
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserSAMLSourceConnection'
+      required:
+      - pagination
+      - results
     PaginatedUserSourceConnectionList:
       type: object
       properties:
@@ -32360,10 +32965,26 @@ components:
           type: string
         error_message:
           type: string
+        check_static_rules:
+          type: boolean
+        check_have_i_been_pwned:
+          type: boolean
+        check_zxcvbn:
+          type: boolean
+        hibp_allowed_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: How many times the password hash is allowed to be on haveibeenpwned
+        zxcvbn_score_threshold:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: If the zxcvbn score is equal or less than this value, the policy
+            will fail.
       required:
       - bound_to
       - component
-      - error_message
       - meta_model_name
       - pk
       - verbose_name
@@ -32409,9 +33030,23 @@ components:
           minLength: 1
         error_message:
           type: string
-          minLength: 1
-      required:
-      - error_message
+        check_static_rules:
+          type: boolean
+        check_have_i_been_pwned:
+          type: boolean
+        check_zxcvbn:
+          type: boolean
+        hibp_allowed_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: How many times the password hash is allowed to be on haveibeenpwned
+        zxcvbn_score_threshold:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: If the zxcvbn score is equal or less than this value, the policy
+            will fail.
     PasswordStage:
       type: object
       description: PasswordStage Serializer
@@ -32438,7 +33073,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
         backends:
           type: array
           items:
@@ -32474,7 +33109,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         backends:
           type: array
           items:
@@ -32536,7 +33171,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         configure_flow:
           type: string
           format: uuid
@@ -32561,7 +33196,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         configure_flow:
           type: string
           format: uuid
@@ -32593,7 +33228,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         configure_flow:
           type: string
           format: uuid
@@ -32620,6 +33255,11 @@ components:
           description: When enabled, the Phone number is only used during enrollment
             to verify the users authenticity. Only a hash of the phone number is saved
             to ensure it is not re-used in the future.
+        mapping:
+          type: string
+          format: uuid
+          nullable: true
+          description: Optionally modify the payload being sent to custom providers.
     PatchedAuthenticatorStaticStageRequest:
       type: object
       description: AuthenticatorStaticStage Serializer
@@ -32630,7 +33270,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         configure_flow:
           type: string
           format: uuid
@@ -32651,7 +33291,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         configure_flow:
           type: string
           format: uuid
@@ -32673,7 +33313,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         not_configured_action:
           $ref: '#/components/schemas/NotConfiguredActionEnum'
         device_classes:
@@ -32694,6 +33334,10 @@ components:
           minLength: 1
           description: If any of the user's device has been used within this threshold,
             this stage will be skipped
+        webauthn_user_verification:
+          allOf:
+          - $ref: '#/components/schemas/UserVerificationEnum'
+          description: Enforce user verification for WebAuthn devices.
     PatchedBlueprintInstanceRequest:
       type: object
       description: Info about a single blueprint instance file
@@ -32719,7 +33363,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         public_key:
           type: string
           minLength: 1
@@ -32765,7 +33409,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         mode:
           $ref: '#/components/schemas/ConsentStageModeEnum'
         consent_expire_in:
@@ -32783,7 +33427,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
     PatchedDockerServiceConnectionRequest:
       type: object
       description: DockerServiceConnection Serializer
@@ -32844,7 +33488,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
     PatchedDuoDeviceRequest:
       type: object
       description: Serializer for Duo authenticator devices
@@ -32864,7 +33508,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         use_global_settings:
           type: boolean
           description: When enabled, global Email connection settings will be used
@@ -33089,7 +33733,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         user_fields:
           type: array
           items:
@@ -33164,7 +33808,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         continue_flow_without_invitation:
           type: boolean
           description: If this flag is set, this Stage will jump to the next Stage
@@ -33186,6 +33830,9 @@ components:
           additionalProperties: {}
           description: Paste your kubeconfig here. authentik will automatically use
             the currently selected context.
+        verify_ssl:
+          type: boolean
+          description: Verify SSL Certificates of the Kubernetes API endpoint
     PatchedLDAPPropertyMappingRequest:
       type: object
       description: LDAP PropertyMapping Serializer
@@ -33663,7 +34310,23 @@ components:
           minLength: 1
         error_message:
           type: string
-          minLength: 1
+        check_static_rules:
+          type: boolean
+        check_have_i_been_pwned:
+          type: boolean
+        check_zxcvbn:
+          type: boolean
+        hibp_allowed_count:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: How many times the password hash is allowed to be on haveibeenpwned
+        zxcvbn_score_threshold:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: If the zxcvbn score is equal or less than this value, the policy
+            will fail.
     PatchedPasswordStageRequest:
       type: object
       description: PasswordStage Serializer
@@ -33674,7 +34337,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         backends:
           type: array
           items:
@@ -33827,7 +34490,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         fields:
           type: array
           items:
@@ -34196,6 +34859,10 @@ components:
           type: string
           format: uuid
           nullable: true
+        flow_device_code:
+          type: string
+          format: uuid
+          nullable: true
         event_retention:
           type: string
           minLength: 1
@@ -34247,7 +34914,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
     PatchedUserLoginStageRequest:
       type: object
       description: UserLoginStage Serializer
@@ -34258,7 +34925,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         session_duration:
           type: string
           minLength: 1
@@ -34274,7 +34941,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
     PatchedUserOAuthSourceConnectionRequest:
       type: object
       description: OAuth Source Serializer
@@ -34325,6 +34992,15 @@ components:
         path:
           type: string
           minLength: 1
+    PatchedUserSAMLSourceConnectionRequest:
+      type: object
+      description: SAML Source Serializer
+      properties:
+        user:
+          type: integer
+        identifier:
+          type: string
+          minLength: 1
     PatchedUserWriteStageRequest:
       type: object
       description: UserWriteStage Serializer
@@ -34335,7 +35011,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         create_users_as_inactive:
           type: boolean
           description: When set, newly created users are inactive and cannot login.
@@ -34375,7 +35051,7 @@ components:
           $ref: '#/components/schemas/ContextualFlowInfo'
         component:
           type: string
-          default: ak-flow-sources-plex
+          default: ak-source-plex
         response_errors:
           type: object
           additionalProperties:
@@ -34397,7 +35073,7 @@ components:
         component:
           type: string
           minLength: 1
-          default: ak-flow-sources-plex
+          default: ak-source-plex
     PlexSource:
       type: object
       description: Plex Source Serializer
@@ -34457,6 +35133,10 @@ components:
           readOnly: true
         user_path_template:
           type: string
+        icon:
+          type: string
+          nullable: true
+          readOnly: true
         client_id:
           type: string
           description: Client identifier used to talk to Plex.
@@ -34474,6 +35154,7 @@ components:
           description: Plex token used to check friends
       required:
       - component
+      - icon
       - managed
       - meta_model_name
       - name
@@ -34895,7 +35576,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
         fields:
           type: array
           items:
@@ -34924,7 +35605,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         fields:
           type: array
           items:
@@ -35095,6 +35776,7 @@ components:
       - reddit
       - twitter
       - mailcow
+      - twitch
       type: string
     ProxyMode:
       enum:
@@ -35876,6 +36558,10 @@ components:
           readOnly: true
         user_path_template:
           type: string
+        icon:
+          type: string
+          nullable: true
+          readOnly: true
         pre_authentication_flow:
           type: string
           format: uuid
@@ -35924,6 +36610,7 @@ components:
             doesn''t log out manually. (Format: hours=1;minutes=2;seconds=3).'
       required:
       - component
+      - icon
       - managed
       - meta_model_name
       - name
@@ -36317,8 +37004,13 @@ components:
           readOnly: true
         user_path_template:
           type: string
+        icon:
+          type: string
+          nullable: true
+          readOnly: true
       required:
       - component
+      - icon
       - managed
       - meta_model_name
       - name
@@ -36430,7 +37122,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
       required:
       - component
       - meta_model_name
@@ -36474,7 +37166,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
       required:
       - name
     StaticDevice:
@@ -36693,6 +37385,10 @@ components:
           type: string
           format: uuid
           nullable: true
+        flow_device_code:
+          type: string
+          format: uuid
+          nullable: true
         event_retention:
           type: string
           description: 'Events will be deleted after this duration.(Format: weeks=3;days=2;hours=3,seconds=2).'
@@ -36744,6 +37440,10 @@ components:
           format: uuid
           nullable: true
         flow_user_settings:
+          type: string
+          format: uuid
+          nullable: true
+        flow_device_code:
           type: string
           format: uuid
           nullable: true
@@ -36927,7 +37627,7 @@ components:
         groups_obj:
           type: array
           items:
-            $ref: '#/components/schemas/Group'
+            $ref: '#/components/schemas/UserGroup'
           readOnly: true
         email:
           type: string
@@ -37002,7 +37702,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
       required:
       - component
       - meta_model_name
@@ -37020,7 +37720,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
       required:
       - name
     UserFieldsEnum:
@@ -37029,6 +37729,59 @@ components:
       - username
       - upn
       type: string
+    UserGroup:
+      type: object
+      description: Simplified Group Serializer for user's groups
+      properties:
+        pk:
+          type: string
+          format: uuid
+          readOnly: true
+          title: Group uuid
+        num_pk:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 80
+        is_superuser:
+          type: boolean
+          description: Users added to this group will be superusers.
+        parent:
+          type: string
+          format: uuid
+          nullable: true
+        parent_name:
+          type: string
+          readOnly: true
+        attributes:
+          type: object
+          additionalProperties: {}
+      required:
+      - name
+      - num_pk
+      - parent_name
+      - pk
+    UserGroupRequest:
+      type: object
+      description: Simplified Group Serializer for user's groups
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 80
+        is_superuser:
+          type: boolean
+          description: Users added to this group will be superusers.
+        parent:
+          type: string
+          format: uuid
+          nullable: true
+        attributes:
+          type: object
+          additionalProperties: {}
+      required:
+      - name
     UserLoginStage:
       type: object
       description: UserLoginStage Serializer
@@ -37055,7 +37808,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
         session_duration:
           type: string
           description: 'Determines how long a session lasts. Default of 0 means that
@@ -37077,7 +37830,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         session_duration:
           type: string
           minLength: 1
@@ -37111,7 +37864,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
       required:
       - component
       - meta_model_name
@@ -37129,7 +37882,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
       required:
       - name
     UserMatchingModeEnum:
@@ -37260,6 +38013,39 @@ components:
       - groups
       - name
       - username
+    UserSAMLSourceConnection:
+      type: object
+      description: SAML Source Serializer
+      properties:
+        pk:
+          type: integer
+          readOnly: true
+          title: ID
+        user:
+          type: integer
+        source:
+          allOf:
+          - $ref: '#/components/schemas/Source'
+          readOnly: true
+        identifier:
+          type: string
+      required:
+      - identifier
+      - pk
+      - source
+      - user
+    UserSAMLSourceConnectionRequest:
+      type: object
+      description: SAML Source Serializer
+      properties:
+        user:
+          type: integer
+        identifier:
+          type: string
+          minLength: 1
+      required:
+      - identifier
+      - user
     UserSelf:
       type: object
       description: User Serializer for information a user can retrieve about themselves
@@ -37431,7 +38217,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/Flow'
+            $ref: '#/components/schemas/FlowSet'
         create_users_as_inactive:
           type: boolean
           description: When set, newly created users are inactive and cannot login.
@@ -37459,7 +38245,7 @@ components:
         flow_set:
           type: array
           items:
-            $ref: '#/components/schemas/FlowRequest'
+            $ref: '#/components/schemas/FlowSetRequest'
         create_users_as_inactive:
           type: boolean
           description: When set, newly created users are inactive and cannot login.
@@ -37545,5 +38331,6 @@ components:
       type: apiKey
       in: header
       name: Authorization
+      scheme: bearer
 servers:
 - url: /api/v3/

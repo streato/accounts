@@ -1,13 +1,15 @@
 """saml sp models"""
+from typing import Optional
 
 from django.db import models
 from django.http import HttpRequest
+from django.templatetags.static import static
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from rest_framework.serializers import Serializer
 
-from authentik.core.models import Source
-from authentik.core.types import UILoginButton
+from authentik.core.models import Source, UserSourceConnection
+from authentik.core.types import UILoginButton, UserSettingSerializer
 from authentik.crypto.models import CertificateKeyPair
 from authentik.flows.challenge import ChallengeTypes, RedirectChallenge
 from authentik.flows.models import Flow
@@ -161,7 +163,7 @@ class SAMLSource(Source):
 
     @property
     def serializer(self) -> type[Serializer]:
-        from authentik.sources.saml.api import SAMLSourceSerializer
+        from authentik.sources.saml.api.source import SAMLSourceSerializer
 
         return SAMLSourceSerializer
 
@@ -189,6 +191,23 @@ class SAMLSource(Source):
                 }
             ),
             name=self.name,
+            icon_url=self.get_icon,
+        )
+
+    def ui_user_settings(self) -> Optional[UserSettingSerializer]:
+        icon = self.get_icon
+        if not icon:
+            icon = static(f"authentik/sources/{self.slug}.svg")
+        return UserSettingSerializer(
+            data={
+                "title": self.name,
+                "component": "ak-user-settings-source-saml",
+                "configure_url": reverse(
+                    "authentik_sources_saml:login",
+                    kwargs={"source_slug": self.slug},
+                ),
+                "icon_url": icon,
+            }
         )
 
     def __str__(self):
@@ -198,3 +217,20 @@ class SAMLSource(Source):
 
         verbose_name = _("SAML Source")
         verbose_name_plural = _("SAML Sources")
+
+
+class UserSAMLSourceConnection(UserSourceConnection):
+    """Connection to configured SAML Sources."""
+
+    identifier = models.TextField()
+
+    @property
+    def serializer(self) -> Serializer:
+        from authentik.sources.saml.api.source_connection import UserSAMLSourceConnectionSerializer
+
+        return UserSAMLSourceConnectionSerializer
+
+    class Meta:
+
+        verbose_name = _("User SAML Source Connection")
+        verbose_name_plural = _("User SAML Source Connections")

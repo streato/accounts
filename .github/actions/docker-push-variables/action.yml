@@ -32,32 +32,27 @@ runs:
       shell: python
       run: |
         """Helper script to get the actual branch name, docker safe"""
+        import configparser
         import os
         from time import time
 
-        env_pr_branch = "GITHUB_HEAD_REF"
-        default_branch = "GITHUB_REF"
-        sha = "GITHUB_SHA"
-
-        branch_name = os.environ[default_branch]
-        if os.environ.get(env_pr_branch, "") != "":
-            branch_name = os.environ[env_pr_branch]
-
-        should_build = str(os.environ.get("DOCKER_USERNAME", "") != "").lower()
-
-        print("##[set-output name=branchName]%s" % branch_name)
-        print(
-            "##[set-output name=branchNameContainer]%s"
-            % branch_name.replace("refs/heads/", "").replace("/", "-")
-        )
-        print("##[set-output name=timestamp]%s" % int(time()))
-        print("##[set-output name=sha]%s" % os.environ[sha])
-        print("##[set-output name=shouldBuild]%s" % should_build)
-
-        import configparser
         parser = configparser.ConfigParser()
         parser.read(".bumpversion.cfg")
+
+        branch_name = os.environ["GITHUB_REF"]
+        if os.environ.get("GITHUB_HEAD_REF", "") != "":
+            branch_name = os.environ["GITHUB_HEAD_REF"]
+
+        should_build = str(os.environ.get("DOCKER_USERNAME", "") != "").lower()
         version = parser.get("bumpversion", "current_version")
         version_family = ".".join(version.split(".")[:-1])
-        print("##[set-output name=version]%s" % version)
-        print("##[set-output name=versionFamily]%s" % version_family)
+        safe_branch_name = branch_name.replace("refs/heads/", "").replace("/", "-")
+
+        with open(os.environ["GITHUB_OUTPUT"], "a+", encoding="utf-8") as _output:
+            print("branchName=%s" % branch_name, file=_output)
+            print("branchNameContainer=%s" % safe_branch_name, file=_output)
+            print("timestamp=%s" % int(time()), file=_output)
+            print("sha=%s" % os.environ["GITHUB_SHA"], file=_output)
+            print("shouldBuild=%s" % should_build, file=_output)
+            print("version=%s" % version, file=_output)
+            print("versionFamily=%s" % version_family, file=_output)

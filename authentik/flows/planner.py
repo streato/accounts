@@ -27,11 +27,12 @@ PLAN_CONTEXT_SOURCE = "source"
 # was restored.
 PLAN_CONTEXT_IS_RESTORED = "is_restored"
 CACHE_TIMEOUT = int(CONFIG.y("redis.cache_timeout_flows"))
+CACHE_PREFIX = "goauthentik.io/flows/planner/"
 
 
 def cache_key(flow: Flow, user: Optional[User] = None) -> str:
     """Generate Cache key for flow"""
-    prefix = f"flow_{flow.pk}"
+    prefix = CACHE_PREFIX + str(flow.pk)
     if user:
         prefix += f"#{user.pk}"
     return prefix
@@ -141,6 +142,7 @@ class FlowPlanner:
             # First off, check the flow's direct policy bindings
             # to make sure the user even has access to the flow
             engine = PolicyEngine(self.flow, user, request)
+            engine.use_cache = self.use_cache
             if default_context:
                 span.set_data("default_context", cleanse_dict(default_context))
                 engine.request.context.update(default_context)
@@ -192,37 +194,40 @@ class FlowPlanner:
             if default_context:
                 plan.context = default_context
             # Check Flow policies
-            for binding in FlowStageBinding.objects.filter(target__pk=self.flow.pk).order_by(
-                "order"
-            ):
+            bindings = list(
+                FlowStageBinding.objects.filter(target__pk=self.flow.pk).order_by("order")
+            )
+            stages = Stage.objects.filter(flowstagebinding__in=[binding.pk for binding in bindings])
+            for binding in bindings:
                 binding: FlowStageBinding
-                stage = binding.stage
+                stage = [stage for stage in stages if stage.pk == binding.stage_id][0]
                 marker = StageMarker()
                 if binding.evaluate_on_plan:
                     self._logger.debug(
                         "f(plan): evaluating on plan",
-                        stage=binding.stage,
+                        stage=stage,
                     )
                     engine = PolicyEngine(binding, user, request)
+                    engine.use_cache = self.use_cache
                     engine.request.context["flow_plan"] = plan
                     engine.request.context.update(plan.context)
                     engine.build()
                     if engine.passing:
                         self._logger.debug(
                             "f(plan): stage passing",
-                            stage=binding.stage,
+                            stage=stage,
                         )
                     else:
                         stage = None
                 else:
                     self._logger.debug(
                         "f(plan): not evaluating on plan",
-                        stage=binding.stage,
+                        stage=stage,
                     )
                 if binding.re_evaluate_policies and stage:
                     self._logger.debug(
                         "f(plan): stage has re-evaluate marker",
-                        stage=binding.stage,
+                        stage=stage,
                     )
                     marker = ReevaluateMarker(binding=binding)
                 if stage:

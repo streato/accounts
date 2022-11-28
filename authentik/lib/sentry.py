@@ -2,7 +2,6 @@
 from asyncio.exceptions import CancelledError
 from typing import Any, Optional
 
-from aioredis.errors import ConnectionClosedError, ReplyError
 from billiard.exceptions import SoftTimeLimitExceeded, WorkerLostError
 from celery.exceptions import CeleryError
 from channels.middleware import BaseMiddleware
@@ -35,7 +34,6 @@ from authentik.lib.utils.http import authentik_user_agent
 from authentik.lib.utils.reflection import class_to_path, get_env
 
 LOGGER = get_logger()
-SENTRY_DSN = "https://a579bb09306d4f8b8d8847c052d3a1d3@sentry.beryju.org/8"
 
 
 class SentryWSMiddleware(BaseMiddleware):
@@ -72,7 +70,7 @@ def sentry_init(**sentry_init_kwargs):
     kwargs.update(**sentry_init_kwargs)
     # pylint: disable=abstract-class-instantiated
     sentry_sdk_init(
-        dsn=SENTRY_DSN,
+        dsn=CONFIG.y("error_reporting.sentry_dsn"),
         integrations=[
             DjangoIntegration(transaction_style="function_name"),
             CeleryIntegration(),
@@ -124,8 +122,6 @@ def before_send(event: dict, hint: dict) -> Optional[dict]:
         ConnectionInterrupted,
         RedisError,
         ResponseError,
-        ReplyError,
-        ConnectionClosedError,
         # websocket errors
         ChannelFull,
         WebSocketException,

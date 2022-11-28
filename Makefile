@@ -53,7 +53,7 @@ migrate:
 	python -m lifecycle.migrate
 
 run:
-	go run -v cmd/server/main.go
+	go run -v ./cmd/server/
 
 i18n-extract: i18n-extract-core web-extract
 
@@ -69,11 +69,11 @@ gen-build:
 	AUTHENTIK_DEBUG=true ak spectacular --file schema.yml
 
 gen-diff:
-	git show $(shell git tag -l | tail -n 1):schema.yml > old_schema.yml
+	git show $(shell git describe --abbrev=0):schema.yml > old_schema.yml
 	docker run \
 		--rm -v ${PWD}:/local \
 		--user ${UID}:${GID} \
-		docker.io/openapitools/openapi-diff:2.0.1 \
+		docker.io/openapitools/openapi-diff:2.1.0-beta.3 \
 		--markdown /local/diff.md \
 		/local/old_schema.yml /local/schema.yml
 	rm old_schema.yml
@@ -90,11 +90,11 @@ gen-client-ts:
 		-i /local/schema.yml \
 		-g typescript-fetch \
 		-o /local/gen-ts-api \
-		--additional-properties=typescriptThreePlus=true,supportsES6=true,npmName=@goauthentik/api,npmVersion=${NPM_VERSION} \
+		-c /local/scripts/api-ts-config.yaml \
+		--additional-properties=npmVersion=${NPM_VERSION} \
 		--git-repo-id authentik \
 		--git-user-id goauthentik
 	mkdir -p web/node_modules/@goauthentik/api
-	\cp -fv scripts/web_api_readme.md gen-ts-api/README.md
 	cd gen-ts-api && npm i
 	\cp -rfv gen-ts-api/* web/node_modules/@goauthentik/api
 
@@ -151,13 +151,16 @@ web-extract:
 ## Website
 #########################
 
-website: website-lint-fix
+website: website-lint-fix website-build
 
 website-install:
 	cd website && npm ci
 
 website-lint-fix:
 	cd website && npm run prettier
+
+website-build:
+	cd website && npm run build
 
 website-watch:
 	cd website && npm run watch
@@ -194,7 +197,4 @@ dev-reset:
 	dropdb -U postgres -h localhost authentik
 	createdb -U postgres -h localhost authentik
 	redis-cli -n 0 flushall
-	redis-cli -n 1 flushall
-	redis-cli -n 2 flushall
-	redis-cli -n 3 flushall
 	make migrate

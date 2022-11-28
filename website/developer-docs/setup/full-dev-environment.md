@@ -4,7 +4,7 @@ title: Full development environment
 
 ## Requirements
 
--   Python 3.10
+-   Python 3.11
 -   poetry, which is used to manage dependencies, and can be installed with `pip install poetry`
 -   Go 1.18
 -   PostgreSQL (any recent version will do)
@@ -39,7 +39,7 @@ Run `make gen` to generate an updated OpenAPI document for any changes you made.
 
 By default, no compiled bundle of the frontend is included so this step is required even if you're not developing for the UI.
 
-To build the UI once, run `web-build`.
+To build the UI once, run `make web-build`.
 
 Alternatively, if you want to live-edit the UI, you can run `make web-watch` instead.
 This will immediately update the UI with any changes you make so you can see the results in real time without needing to rebuild.

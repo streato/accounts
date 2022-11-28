@@ -7,12 +7,6 @@ slug: "xxxx.x"
 
 ## New features
 
-## API Changes
-
-_Insert output of `make gen-diff` here_
-
-## Minor changes/fixes
-
 ## Upgrading
 
 This release does not introduce any new requirements.
@@ -28,5 +22,11 @@ Update your values to use the new images:
 ```yaml
 image:
     repository: ghcr.io/goauthentik/server
-    tag: xxxx.x.1
+    tag: xxxx.x.0
 ```
+
+## Minor changes/fixes
+
+## API Changes
+
+_Insert output of `make gen-diff` here_

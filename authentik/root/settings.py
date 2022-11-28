@@ -55,6 +55,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Application definition
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
@@ -133,7 +134,7 @@ SPECTACULAR_SETTINGS = {
     },
     "AUTHENTICATION_WHITELIST": ["authentik.api.authentication.TokenAuthentication"],
     "LICENSE": {
-        "name": "GNU GPLv3",
+        "name": "MIT",
         "url": "https://github.com/goauthentik/authentik/blob/main/LICENSE",
     },
     "ENUM_NAME_OVERRIDES": {
@@ -144,6 +145,7 @@ SPECTACULAR_SETTINGS = {
         "ProxyMode": "authentik.providers.proxy.models.ProxyMode",
         "PromptTypeEnum": "authentik.stages.prompt.models.FieldTypes",
         "LDAPAPIAccessMode": "authentik.providers.ldap.models.APIAccessMode",
+        "UserVerificationEnum": "authentik.stages.authenticator_webauthn.models.UserVerification",
     },
     "ENUM_ADD_EXPLICIT_BLANK_NULL_CHOICE": False,
     "POSTPROCESSING_HOOKS": [
@@ -174,6 +176,10 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "TEST_REQUEST_DEFAULT_FORMAT": "json",
+    "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.AnonRateThrottle"],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": CONFIG.y("throttle.default"),
+    },
 }
 
 REDIS_PROTOCOL_PREFIX = "redis://"
@@ -190,9 +196,10 @@ _redis_url = (
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"{_redis_url}/{CONFIG.y('redis.cache_db')}",
+        "LOCATION": f"{_redis_url}/{CONFIG.y('redis.db')}",
         "TIMEOUT": int(CONFIG.y("redis.cache_timeout", 300)),
         "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+        "KEY_PREFIX": "authentik_cache",
     }
 }
 DJANGO_REDIS_SCAN_ITERSIZE = 1000
@@ -230,7 +237,7 @@ ROOT_URLCONF = "authentik.root.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": ["/templates"],
+        "DIRS": [CONFIG.y("email.template_dir")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -250,7 +257,8 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [f"{_redis_url}/{CONFIG.y('redis.ws_db')}"],
+            "hosts": [f"{_redis_url}/{CONFIG.y('redis.db')}"],
+            "prefix": "authentik_channels",
         },
     },
 }
@@ -269,6 +277,12 @@ DATABASES = {
         "PORT": int(CONFIG.y("postgresql.port")),
     }
 }
+
+if CONFIG.y_bool("postgresql.use_pgbouncer", False):
+    # https://docs.djangoproject.com/en/4.0/ref/databases/#transaction-pooling-server-side-cursors
+    DATABASES["default"]["DISABLE_SERVER_SIDE_CURSORS"] = True
+    # https://docs.djangoproject.com/en/4.0/ref/databases/#persistent-connections
+    DATABASES["default"]["CONN_MAX_AGE"] = None  # persistent
 
 # Email
 EMAIL_HOST = CONFIG.y("email.host")
@@ -327,12 +341,8 @@ CELERY_BEAT_SCHEDULE = {
 }
 CELERY_TASK_CREATE_MISSING_QUEUES = True
 CELERY_TASK_DEFAULT_QUEUE = "authentik"
-CELERY_BROKER_URL = (
-    f"{_redis_url}/{CONFIG.y('redis.message_queue_db')}{REDIS_CELERY_TLS_REQUIREMENTS}"
-)
-CELERY_RESULT_BACKEND = (
-    f"{_redis_url}/{CONFIG.y('redis.message_queue_db')}{REDIS_CELERY_TLS_REQUIREMENTS}"
-)
+CELERY_BROKER_URL = f"{_redis_url}/{CONFIG.y('redis.db')}{REDIS_CELERY_TLS_REQUIREMENTS}"
+CELERY_RESULT_BACKEND = f"{_redis_url}/{CONFIG.y('redis.db')}{REDIS_CELERY_TLS_REQUIREMENTS}"
 
 # Sentry integration
 env = get_env()
@@ -424,7 +434,7 @@ _LOGGING_HANDLER_MAP = {
     "daphne": "WARNING",
     "kubernetes": "INFO",
     "asyncio": "WARNING",
-    "aioredis": "WARNING",
+    "redis": "WARNING",
     "silk": "INFO",
 }
 for handler_name, level in _LOGGING_HANDLER_MAP.items():

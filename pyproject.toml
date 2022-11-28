@@ -12,12 +12,12 @@ reportOptionalMemberAccess = false
 # so we have to disable those for now
 reportGeneralTypeIssues = false
 verboseOutput = false
-pythonVersion = "3.10"
+pythonVersion = "3.11"
 pythonPlatform = "All"
 
 [tool.black]
 line-length = 100
-target-version = ['py310']
+target-version = ['py311']
 exclude = 'node_modules'
 
 [tool.isort]
@@ -100,13 +100,13 @@ addopts = "-p no:celery --junitxml=unittest.xml"
 
 [tool.poetry]
 name = "authentik"
-version = "2022.9.0"
+version = "2022.11.1"
 description = ""
 authors = ["authentik Team <hello@goauthentik.io>"]
 
 [tool.poetry.dependencies]
 celery = "*"
-channels = "*"
+channels = {version = "*", extras = ["daphne"]}
 channels-redis = "*"
 codespell = "*"
 colorama = "*"
@@ -124,25 +124,29 @@ djangorestframework = "*"
 djangorestframework-guardian = "*"
 docker = "*"
 drf-spectacular = "*"
+dumb-init = "*"
 duo-client = "*"
 facebook-sdk = "*"
+flower = "*"
 geoip2 = "*"
 gunicorn = "*"
 kubernetes = "*"
 ldap3 = "*"
 lxml = "*"
+opencontainers = {extras = ["reggie"],version = "*"}
 packaging = "*"
 paramiko = "*"
 psycopg2-binary = "*"
 pycryptodome = "*"
 pyjwt = "*"
-python = "^3.10"
+python = "^3.11"
 pyyaml = "*"
 requests-oauthlib = "*"
 sentry-sdk = "*"
 service_identity = "*"
 structlog = "*"
 swagger-spec-validator = "*"
+twilio = "*"
 twisted = "*"
 ua-parser = "*"
 urllib3 = {extras = ["secure"],version = "*"}
@@ -150,10 +154,7 @@ uvicorn = {extras = ["standard"],version = "*"}
 webauthn = "*"
 wsproto = "*"
 xmlsec = "*"
-twilio = "*"
-dumb-init = "*"
-flower = "*"
-opencontainers = {extras = ["reggie"],version = "*"}
+zxcvbn = "*"
 
 [tool.poetry.dev-dependencies]
 bandit = "*"

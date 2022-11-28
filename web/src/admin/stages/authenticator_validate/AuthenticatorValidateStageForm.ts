@@ -16,6 +16,7 @@ import {
     DeviceClassesEnum,
     NotConfiguredActionEnum,
     StagesApi,
+    UserVerificationEnum,
 } from "@goauthentik/api";
 
 @customElement("ak-stage-authenticator-validate-form")
@@ -179,6 +180,35 @@ export class AuthenticatorValidateStageForm extends ModelForm<AuthenticatorValid
                                 NotConfiguredActionEnum.Skip}
                             >
                                 ${t`Continue`}
+                            </option>
+                        </select>
+                    </ak-form-element-horizontal>
+                    <ak-form-element-horizontal
+                        label=${t`WebAuthn User verification`}
+                        ?required=${true}
+                        name="webauthnUserVerification"
+                    >
+                        <select class="pf-c-form-control">
+                            <option
+                                value="${UserVerificationEnum.Required}"
+                                ?selected=${this.instance?.webauthnUserVerification ===
+                                UserVerificationEnum.Required}
+                            >
+                                ${t`User verification must occur.`}
+                            </option>
+                            <option
+                                value="${UserVerificationEnum.Preferred}"
+                                ?selected=${this.instance?.webauthnUserVerification ===
+                                UserVerificationEnum.Preferred}
+                            >
+                                ${t`User verification is preferred if available, but not required.`}
+                            </option>
+                            <option
+                                value="${UserVerificationEnum.Discouraged}"
+                                ?selected=${this.instance?.webauthnUserVerification ===
+                                UserVerificationEnum.Discouraged}
+                            >
+                                ${t`User verification should not occur.`}
                             </option>
                         </select>
                     </ak-form-element-horizontal>

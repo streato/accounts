@@ -17,10 +17,7 @@ type RedisConfig struct {
 	Password               string `yaml:"password" env:"AUTHENTIK_REDIS__PASSWORD"`
 	TLS                    bool   `yaml:"tls" env:"AUTHENTIK_REDIS__TLS"`
 	TLSReqs                string `yaml:"tls_reqs" env:"AUTHENTIK_REDIS__TLS_REQS"`
-	CacheDB                int    `yaml:"cache_db" env:"AUTHENTIK_REDIS__CACHE_DB"`
-	MessageQueueDB         int    `yaml:"message_queue_db" env:"AUTHENTIK_REDIS__MESSAGE_QUEUE_DB"`
-	WSDB                   int    `yaml:"ws_db" env:"AUTHENTIK_REDIS__WS_DB"`
-	OutpostSessionDB       int    `yaml:"outpost_session_db" env:"AUTHENTIK_REDIS__OUTPOST_SESSION_DB"`
+	DB                     int    `yaml:"cache_db" env:"AUTHENTIK_REDIS__CACHE_DB"`
 	CacheTimeout           int    `yaml:"cache_timeout" env:"AUTHENTIK_REDIS__CACHE_TIMEOUT"`
 	CacheTimeoutFlows      int    `yaml:"cache_timeout_flows" env:"AUTHENTIK_REDIS__CACHE_TIMEOUT_FLOWS"`
 	CacheTimeoutPolicies   int    `yaml:"cache_timeout_policies" env:"AUTHENTIK_REDIS__CACHE_TIMEOUT_POLICIES"`
@@ -41,10 +38,10 @@ type PathsConfig struct {
 }
 
 type ErrorReportingConfig struct {
-	Enabled     bool   `yaml:"enabled" env:"AUTHENTIK_ERROR_REPORTING__ENABLED"`
-	Environment string `yaml:"environment" env:"AUTHENTIK_ERROR_REPORTING__ENVIRONMENT"`
-	SendPII     bool   `yaml:"send_pii" env:"AUTHENTIK_ERROR_REPORTING__SEND_PII"`
-	DSN         string
+	Enabled     bool    `yaml:"enabled" env:"AUTHENTIK_ERROR_REPORTING__ENABLED"`
+	SentryDSN   string  `yaml:"sentry_dsn" env:"AUTHENTIK_ERROR_REPORTING__SENTRY_DSN"`
+	Environment string  `yaml:"environment" env:"AUTHENTIK_ERROR_REPORTING__ENVIRONMENT"`
+	SendPII     bool    `yaml:"send_pii" env:"AUTHENTIK_ERROR_REPORTING__SEND_PII"`
 	SampleRate  float64 `yaml:"sample_rate" env:"AUTHENTIK_ERROR_REPORTING__SAMPLE_RATE"`
 }
 

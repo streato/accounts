@@ -13,14 +13,15 @@ class AuthenticatorValidateStageSerializer(StageSerializer):
 
     def validate_not_configured_action(self, value):
         """Ensure that a configuration stage is set when not_configured_action is configure"""
-        configuration_stages = self.initial_data.get("configuration_stages")
-        if value == NotConfiguredAction.CONFIGURE and configuration_stages is None:
-            raise ValidationError(
-                (
-                    'When "Not configured action" is set to "Configure", '
-                    "you must set a configuration stage."
+        configuration_stages = self.initial_data.get("configuration_stages", None)
+        if value == NotConfiguredAction.CONFIGURE:
+            if not configuration_stages or len(configuration_stages) < 1:
+                raise ValidationError(
+                    (
+                        'When "Not configured action" is set to "Configure", '
+                        "you must set a configuration stage."
+                    )
                 )
-            )
         return value
 
     class Meta:
@@ -31,6 +32,7 @@ class AuthenticatorValidateStageSerializer(StageSerializer):
             "device_classes",
             "configuration_stages",
             "last_auth_threshold",
+            "webauthn_user_verification",
         ]
 
 

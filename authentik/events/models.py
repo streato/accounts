@@ -1,6 +1,7 @@
 """authentik events models"""
 import time
 from collections import Counter
+from copy import deepcopy
 from datetime import timedelta
 from inspect import currentframe
 from smtplib import SMTPException
@@ -210,7 +211,7 @@ class Event(SerializerModel, ExpiringModel):
             current = currentframe()
             parent = current.f_back
             app = parent.f_globals["__name__"]
-        cleaned_kwargs = cleanse_dict(sanitize_dict(kwargs))
+        cleaned_kwargs = cleanse_dict(sanitize_dict(deepcopy(kwargs)))
         event = Event(action=action, app=app, context=cleaned_kwargs)
         return event
 
@@ -293,7 +294,7 @@ class Event(SerializerModel, ExpiringModel):
         return f"{self.action}: {self.context}"
 
     def __str__(self) -> str:
-        return f"<Event action={self.action} user={self.user} context={self.context}>"
+        return f"Event action={self.action} user={self.user} context={self.context}"
 
     class Meta:
 
@@ -445,8 +446,9 @@ class NotificationTransport(SerializerModel):
             subject += notification.body[:75]
         mail = TemplateEmailMessage(
             subject=subject,
-            template_name="email/generic.html",
             to=[notification.user.email],
+            language=notification.user.locale(),
+            template_name="email/generic.html",
             template_context={
                 "title": subject,
                 "body": notification.body,
@@ -560,7 +562,7 @@ class NotificationRule(SerializerModel, PolicyBindingModel):
 
 
 class NotificationWebhookMapping(PropertyMapping):
-    """Modify the schema and layout of the webhook being sent"""
+    """Modify the payload of outgoing webhook requests"""
 
     @property
     def component(self) -> str:
@@ -573,9 +575,9 @@ class NotificationWebhookMapping(PropertyMapping):
         return NotificationWebhookMappingSerializer
 
     def __str__(self):
-        return f"Notification Webhook Mapping {self.name}"
+        return f"Webhook Mapping {self.name}"
 
     class Meta:
 
-        verbose_name = _("Notification Webhook Mapping")
-        verbose_name_plural = _("Notification Webhook Mappings")
+        verbose_name = _("Webhook Mapping")
+        verbose_name_plural = _("Webhook Mappings")

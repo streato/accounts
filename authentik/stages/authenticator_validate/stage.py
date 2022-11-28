@@ -134,6 +134,12 @@ class AuthenticatorValidationChallengeResponse(ChallengeResponse):
         # Here we only check if the any data was sent at all
         if "code" not in attrs and "webauthn" not in attrs and "duo" not in attrs:
             raise ValidationError("Empty response")
+        self.stage.executor.plan.context.setdefault(PLAN_CONTEXT_METHOD, "auth_mfa")
+        self.stage.executor.plan.context.setdefault(PLAN_CONTEXT_METHOD_ARGS, {})
+        self.stage.executor.plan.context[PLAN_CONTEXT_METHOD_ARGS].setdefault("mfa_devices", [])
+        self.stage.executor.plan.context[PLAN_CONTEXT_METHOD_ARGS]["mfa_devices"].append(
+            self.device
+        )
         return attrs
 
 
@@ -177,7 +183,7 @@ class AuthenticatorValidateStageView(ChallengeStageView):
                 data={
                     "device_class": device_class,
                     "device_uid": device.pk,
-                    "challenge": get_challenge_for_device(self.request, device),
+                    "challenge": get_challenge_for_device(self.request, stage, device),
                 }
             )
             challenge.is_valid()
@@ -194,7 +200,10 @@ class AuthenticatorValidateStageView(ChallengeStageView):
             data={
                 "device_class": DeviceClasses.WEBAUTHN,
                 "device_uid": -1,
-                "challenge": get_webauthn_challenge_without_user(self.request),
+                "challenge": get_webauthn_challenge_without_user(
+                    self.request,
+                    self.executor.current_stage,
+                ),
             }
         )
         challenge.is_valid()

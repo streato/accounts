@@ -10,51 +10,6 @@ module.exports = {
             items: [
                 {
                     type: "category",
-                    label: "Infrastructure",
-                    items: [
-                        "services/apache-guacamole/index",
-                        "services/awx-tower/index",
-                        "services/fortimanager/index",
-                        "services/harbor/index",
-                        "services/hashicorp-vault/index",
-                        "services/minio/index",
-                        "services/opnsense/index",
-                        "services/pfsense/index",
-                        "services/pgadmin/index",
-                        "services/powerdns-admin/index",
-                        "services/veeam-enterprise-manager/index",
-                    ],
-                },
-                {
-                    type: "category",
-                    label: "Hypervisors / Orchestrators",
-                    items: [
-                        "services/portainer/index",
-                        "services/proxmox-ve/index",
-                        "services/rancher/index",
-                        "services/vmware-vcenter/index",
-                    ],
-                },
-                {
-                    type: "category",
-                    label: "Monitoring",
-                    items: [
-                        "services/grafana/index",
-                        "services/ubuntu-landscape/index",
-                        "services/uptime-kuma/index",
-                        "services/zabbix/index",
-                    ],
-                },
-                {
-                    type: "category",
-                    label: "Cloud Providers",
-                    items: [
-                        "services/aws/index",
-                        "services/oracle-cloud/index",
-                    ],
-                },
-                {
-                    type: "category",
                     label: "Chat, Communication & Collaboration",
                     items: [
                         "services/bookstack/index",
@@ -74,6 +29,19 @@ module.exports = {
                 },
                 {
                     type: "category",
+                    label: "Cloud Providers",
+                    items: [
+                        "services/aws/index",
+                        "services/oracle-cloud/index",
+                    ],
+                },
+                {
+                    type: "category",
+                    label: "Dashboards",
+                    items: ["services/organizr/index"],
+                },
+                {
+                    type: "category",
                     label: "Platforms",
                     items: [
                         "services/budibase/index",
@@ -82,21 +50,34 @@ module.exports = {
                 },
                 {
                     type: "category",
-                    label: "Developer tools",
+                    label: "Hypervisors / Orchestrators",
                     items: [
-                        "services/sentry/index",
-                        "services/sssd/index",
-                        "services/weblate/index",
+                        "services/portainer/index",
+                        "services/proxmox-ve/index",
+                        "services/rancher/index",
+                        "services/vmware-vcenter/index",
                     ],
                 },
                 {
                     type: "category",
-                    label: "Version Control Systems",
+                    label: "Infrastructure",
                     items: [
-                        "services/gitea/index",
-                        "services/github-enterprise-cloud/index",
-                        "services/github-organization/index",
-                        "services/gitlab/index",
+                        "services/apache-guacamole/index",
+                        "services/argocd/index",
+                        "services/awx-tower/index",
+                        "services/fortimanager/index",
+                        "services/harbor/index",
+                        "services/hashicorp-vault/index",
+                        "services/minio/index",
+                        "services/qnap-nas/index",
+                        "services/opnsense/index",
+                        "services/pfsense/index",
+                        "services/pgadmin/index",
+                        "services/powerdns-admin/index",
+                        "services/snipe-it/index",
+                        "services/truecommand/index",
+                        "services/sssd/index",
+                        "services/veeam-enterprise-manager/index",
                     ],
                 },
                 {
@@ -107,6 +88,35 @@ module.exports = {
                         "services/node-red/index",
                         "services/sonarr/index",
                         "services/tautulli/index",
+                        "services/jellyfin/index",
+                    ],
+                },
+                {
+                    type: "category",
+                    label: "Monitoring",
+                    items: [
+                        "services/grafana/index",
+                        "services/ubuntu-landscape/index",
+                        "services/uptime-kuma/index",
+                        "services/zabbix/index",
+                    ],
+                },
+                {
+                    type: "category",
+                    label: "Platforms",
+                    items: [
+                        "services/budibase/index",
+                        "services/wordpress/index",
+                    ],
+                },
+                {
+                    type: "category",
+                    label: "Version Control Systems",
+                    items: [
+                        "services/gitea/index",
+                        "services/github-enterprise-cloud/index",
+                        "services/github-organization/index",
+                        "services/gitlab/index",
                     ],
                 },
             ],
@@ -122,7 +132,24 @@ module.exports = {
                     "Sources of users which can be federated with authentik",
             },
             items: [
+                {
+                    type: "category",
+                    label: "Directory syncronization",
+                    items: [
+                        "sources/active-directory/index",
+                        "sources/freeipa/index",
+                    ],
+                },
                 "sources/general",
+                {
+                    type: "category",
+                    label: "Protocols",
+                    items: [
+                        "sources/ldap/index",
+                        "sources/oauth/index",
+                        "sources/saml/index",
+                    ],
+                },
                 {
                     type: "category",
                     label: "Social Logins",
@@ -133,25 +160,9 @@ module.exports = {
                         "sources/github/index",
                         "sources/google/index",
                         "sources/mailcow/index",
+                        "sources/twitch/index",
                         "sources/plex/index",
                         "sources/twitter/index",
-                    ],
-                },
-                {
-                    type: "category",
-                    label: "Directory syncronization",
-                    items: [
-                        "sources/active-directory/index",
-                        "sources/freeipa/index",
-                    ],
-                },
-                {
-                    type: "category",
-                    label: "Protocols",
-                    items: [
-                        "sources/ldap/index",
-                        "sources/oauth/index",
-                        "sources/saml/index",
                     ],
                 },
             ],

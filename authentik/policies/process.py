@@ -14,7 +14,7 @@ from authentik.lib.utils.errors import exception_to_string
 from authentik.policies.apps import HIST_POLICIES_EXECUTION_TIME
 from authentik.policies.exceptions import PolicyException
 from authentik.policies.models import PolicyBinding
-from authentik.policies.types import PolicyRequest, PolicyResult
+from authentik.policies.types import CACHE_PREFIX, PolicyRequest, PolicyResult
 
 LOGGER = get_logger()
 
@@ -25,7 +25,7 @@ PROCESS_CLASS = FORK_CTX.Process
 
 def cache_key(binding: PolicyBinding, request: PolicyRequest) -> str:
     """Generate Cache key for policy"""
-    prefix = f"policy_{binding.policy_binding_uuid.hex}_"
+    prefix = f"{CACHE_PREFIX}{binding.policy_binding_uuid.hex}_"
     if request.http_request and hasattr(request.http_request, "session"):
         prefix += f"_{request.http_request.session.session_key}"
     if request.user:
@@ -56,8 +56,6 @@ class PolicyProcess(PROCESS_CLASS):
 
     def create_event(self, action: str, message: str, **kwargs):
         """Create event with common values from `self.request` and `self.binding`."""
-        # Keep a reference to http_request even if its None, because cleanse_dict will remove it
-        http_request = self.request.http_request
         event = Event.new(
             action=action,
             message=message,
@@ -67,8 +65,8 @@ class PolicyProcess(PROCESS_CLASS):
             **kwargs,
         )
         event.set_user(self.request.user)
-        if http_request:
-            event.from_http(http_request)
+        if self.request.http_request:
+            event.from_http(self.request.http_request)
         else:
             event.save()
 
@@ -103,7 +101,7 @@ class PolicyProcess(PROCESS_CLASS):
             LOGGER.debug("P_ENG(proc): error", exc=src_exc)
             policy_result = PolicyResult(False, str(src_exc))
         policy_result.source_binding = self.binding
-        if not self.request.debug:
+        if self.request.should_cache:
             key = cache_key(self.binding, self.request)
             cache.set(key, policy_result, CACHE_TIMEOUT)
         LOGGER.debug(

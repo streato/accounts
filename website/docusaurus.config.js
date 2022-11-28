@@ -3,7 +3,6 @@ const sidebar = require("./sidebars.js");
 const releases = sidebar.docs
     .filter((doc) => doc.link?.slug === "releases")[0]
     .items.filter((release) => typeof release === "string");
-const latestVersion = releases[0].replace("releases/v", "");
 
 module.exports = {
     title: "authentik",
@@ -22,6 +21,7 @@ module.exports = {
                 src: "img/icon_left_brand.svg",
             },
             items: [
+                { to: "blog", label: "Blog", position: "left" },
                 {
                     to: "docs/",
                     activeBasePath: "docs",
@@ -41,9 +41,9 @@ module.exports = {
                     position: "left",
                 },
                 {
-                    to: "api/",
-                    activeBasePath: "api",
-                    label: "API",
+                    to: "jobs/",
+                    activeBasePath: "jobs",
+                    label: "Jobs",
                     position: "left",
                 },
                 {
@@ -64,12 +64,14 @@ module.exports = {
                 },
                 {
                     href: "https://github.com/goauthentik/authentik",
-                    label: "GitHub",
+                    className: "header-github-link",
+                    "aria-label": "GitHub repository",
                     position: "right",
                 },
                 {
                     href: "https://goauthentik.io/discord",
-                    label: "Discord",
+                    className: "header-discord-link",
+                    "aria-label": "GitHub repository",
                     position: "right",
                 },
             ],
@@ -77,11 +79,15 @@ module.exports = {
         footer: {
             links: [
                 {
-                    title: "Docs",
+                    title: "Documentation",
                     items: [
                         {
                             label: "Documentation",
                             to: "docs/",
+                        },
+                        {
+                            label: "Integrations",
+                            to: "integrations/",
                         },
                         {
                             label: "Developer Documentation",
@@ -89,7 +95,7 @@ module.exports = {
                         },
                         {
                             label: "Installations",
-                            to: "docs/installation/index",
+                            to: "docs/installation/",
                         },
                     ],
                 },
@@ -104,15 +110,10 @@ module.exports = {
                             label: "Discord",
                             href: "https://goauthentik.io/discord",
                         },
-                        {
-                            html: `<a href="https://www.netlify.com" target="_blank" rel="noreferrer noopener" aria-label="Deploys by Netlify">
-                                    <img src="https://www.netlify.com/img/global/badges/netlify-color-accent.svg" alt="Deploys by Netlify" />
-                                </a>`,
-                        },
                     ],
                 },
             ],
-            copyright: `Copyright © ${new Date().getFullYear()} BeryJu.org. Built with Docusaurus.`,
+            copyright: `Copyright © ${new Date().getFullYear()} authentik Security Inc. Built with Docusaurus.`,
         },
         colorMode: {
             respectPrefersColorScheme: true,
@@ -163,33 +164,14 @@ module.exports = {
             },
         ],
     ],
-    ssrTemplate: `<!DOCTYPE html>
-<html <%~ it.htmlAttributes %>>
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=0.86, maximum-scale=3.0, minimum-scale=0.86">
-    <meta name="generator" content="Docusaurus v<%= it.version %>">
-    <script async defer data-domain="goauthentik.io" src="https://goauthentik.io/js/script.js"></script>
-    <%~ it.headTags %>
-    <% it.metaAttributes.forEach((metaAttribute) => { %>
-      <%~ metaAttribute %>
-    <% }); %>
-    <% it.stylesheets.forEach((stylesheet) => { %>
-      <link rel="stylesheet" href="<%= it.baseUrl %><%= stylesheet %>" />
-    <% }); %>
-    <% it.scripts.forEach((script) => { %>
-      <link rel="preload" href="<%= it.baseUrl %><%= script %>" as="script">
-    <% }); %>
-  </head>
-  <body <%~ it.bodyAttributes %> itemscope="" itemtype="http://schema.org/Organization">
-    <%~ it.preBodyTags %>
-    <div id="__docusaurus">
-      <%~ it.appHtml %>
-    </div>
-    <% it.scripts.forEach((script) => { %>
-      <script src="<%= it.baseUrl %><%= script %>"></script>
-    <% }); %>
-    <%~ it.postBodyTags %>
-  </body>
-</html>`,
+    scripts: [
+        {
+            src: "https://goauthentik.io/js/script.js",
+            async: true,
+            "data-domain": "goauthentik.io",
+        },
+        {
+            src: "https://boards.greenhouse.io/embed/job_board/js?for=authentiksecurity",
+        },
+    ],
 };

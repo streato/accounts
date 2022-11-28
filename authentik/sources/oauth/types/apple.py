@@ -22,7 +22,7 @@ class AppleLoginChallenge(Challenge):
     """Special challenge for apple-native authentication flow, which happens on the client."""
 
     client_id = CharField()
-    component = CharField(default="ak-flow-sources-oauth-apple")
+    component = CharField(default="ak-source-oauth-apple")
     scope = CharField()
     redirect_uri = CharField()
     state = CharField()
@@ -31,7 +31,7 @@ class AppleLoginChallenge(Challenge):
 class AppleChallengeResponse(ChallengeResponse):
     """Pseudo class for plex response"""
 
-    component = CharField(default="ak-flow-sources-oauth-apple")
+    component = CharField(default="ak-source-oauth-apple")
 
 
 class AppleOAuthClient(OAuth2Client):
@@ -113,9 +113,6 @@ class AppleType(SourceType):
     authorization_url = "https://appleid.apple.com/auth/authorize"
     access_token_url = "https://appleid.apple.com/auth/token"  # nosec
     profile_url = ""
-
-    def icon_url(self) -> str:
-        return "https://appleid.cdn-apple.com/appleid/button/logo"
 
     def login_challenge(self, source: OAuthSource, request: HttpRequest) -> Challenge:
         """Pre-general all the things required for the JS SDK"""

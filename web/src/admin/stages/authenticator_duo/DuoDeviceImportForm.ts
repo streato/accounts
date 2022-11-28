@@ -16,9 +16,9 @@ import { until } from "lit/directives/until.js";
 
 import {
     AuthenticatorDuoStage,
+    AuthenticatorDuoStageManualDeviceImportRequest,
     CoreApi,
     StagesApi,
-    StagesAuthenticatorDuoImportDeviceManualCreateRequest,
 } from "@goauthentik/api";
 
 @customElement("ak-stage-authenticator-duo-device-import-form")
@@ -34,23 +34,22 @@ export class DuoDeviceImportForm extends ModelForm<AuthenticatorDuoStage, string
     }
 
     send = (data: AuthenticatorDuoStage): Promise<void> => {
-        const importData = data as unknown as StagesAuthenticatorDuoImportDeviceManualCreateRequest;
-        importData.stageUuid = this.instancePk;
-        return new StagesApi(DEFAULT_CONFIG).stagesAuthenticatorDuoImportDeviceManualCreate(
-            importData,
-        );
+        const importData = data as unknown as AuthenticatorDuoStageManualDeviceImportRequest;
+        return new StagesApi(DEFAULT_CONFIG).stagesAuthenticatorDuoImportDeviceManualCreate({
+            stageUuid: this.instance?.pk || "",
+            authenticatorDuoStageManualDeviceImportRequest: importData,
+        });
     };
 
     renderForm(): TemplateResult {
-        return html`${this.instance?.adminIntegrationKey !== ""
-            ? this.renderFormAutomatic()
-            : html``}
-        ${this.renderFormManual()}`;
+        return html` <form class="pf-c-form pf-m-horizontal">
+            ${this.instance?.adminIntegrationKey !== "" ? this.renderFormAutomatic() : html``}
+            ${this.renderFormManual()}
+        </form>`;
     }
 
     renderFormManual(): TemplateResult {
-        return html`<form class="pf-c-form pf-m-horizontal">
-            <ak-form-element-horizontal label=${t`User`} ?required=${true} name="username">
+        return html`<ak-form-element-horizontal label=${t`User`} ?required=${true} name="username">
                 <select class="pf-c-form-control">
                     ${until(
                         new CoreApi(DEFAULT_CONFIG)
@@ -74,38 +73,34 @@ export class DuoDeviceImportForm extends ModelForm<AuthenticatorDuoStage, string
             <ak-form-element-horizontal label=${t`Duo User ID`} ?required=${true} name="duoUserId">
                 <input type="text" class="pf-c-form-control" required />
                 <p class="pf-c-form__helper-text">
-                    ${t`The user ID in Duo.`}
-                    ${t`Can be either the username (found in the Users list) or the ID (can be found in the URL after clicking on a user).`}
+                    ${t`The user ID in Duo, can be found in the URL after clicking on a user.`}
                 </p>
-            </ak-form-element-horizontal>
-        </form>`;
+            </ak-form-element-horizontal>`;
     }
 
     renderFormAutomatic(): TemplateResult {
         return html`
-            <form class="pf-c-form pf-m-horizontal">
-                <ak-form-element-horizontal label=${t`Automatic import`}>
-                    <ak-action-button
-                        class="pf-m-primary"
-                        .apiRequest=${() => {
-                            return new StagesApi(DEFAULT_CONFIG)
-                                .stagesAuthenticatorDuoImportDevicesAutomaticCreate({
-                                    stageUuid: this.instance?.pk || "",
-                                })
-                                .then((res) => {
-                                    showMessage({
-                                        level: MessageLevel.info,
-                                        message: t`Successfully imported ${res.count} devices.`,
-                                    });
-                                    const modal = this.parentElement as ModalForm;
-                                    modal.open = false;
+            <ak-form-element-horizontal label=${t`Automatic import`}>
+                <ak-action-button
+                    class="pf-m-primary"
+                    .apiRequest=${() => {
+                        return new StagesApi(DEFAULT_CONFIG)
+                            .stagesAuthenticatorDuoImportDevicesAutomaticCreate({
+                                stageUuid: this.instance?.pk || "",
+                            })
+                            .then((res) => {
+                                showMessage({
+                                    level: MessageLevel.info,
+                                    message: t`Successfully imported ${res.count} devices.`,
                                 });
-                        }}
-                    >
-                        ${t`Start automatic import`}
-                    </ak-action-button>
-                </ak-form-element-horizontal>
-            </form>
+                                const modal = this.parentElement as ModalForm;
+                                modal.open = false;
+                            });
+                    }}
+                >
+                    ${t`Start automatic import`}
+                </ak-action-button>
+            </ak-form-element-horizontal>
             <ak-divider>${t`Or manually import`}</ak-divider>
             <br />
         `;

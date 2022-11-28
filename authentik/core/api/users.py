@@ -46,7 +46,6 @@ from structlog.stdlib import get_logger
 
 from authentik.admin.api.metrics import CoordinateSerializer
 from authentik.api.decorators import permission_required
-from authentik.core.api.groups import GroupSerializer
 from authentik.core.api.used_by import UsedByMixin
 from authentik.core.api.utils import LinkSerializer, PassiveSerializer, is_dict
 from authentik.core.middleware import (
@@ -74,6 +73,26 @@ from authentik.tenants.models import Tenant
 LOGGER = get_logger()
 
 
+class UserGroupSerializer(ModelSerializer):
+    """Simplified Group Serializer for user's groups"""
+
+    attributes = JSONField(required=False)
+    parent_name = CharField(source="parent.name", read_only=True)
+
+    class Meta:
+
+        model = Group
+        fields = [
+            "pk",
+            "num_pk",
+            "name",
+            "is_superuser",
+            "parent",
+            "parent_name",
+            "attributes",
+        ]
+
+
 class UserSerializer(ModelSerializer):
     """User Serializer"""
 
@@ -83,7 +102,7 @@ class UserSerializer(ModelSerializer):
     groups = PrimaryKeyRelatedField(
         allow_empty=True, many=True, source="ak_groups", queryset=Group.objects.all()
     )
-    groups_obj = ListSerializer(child=GroupSerializer(), read_only=True, source="ak_groups")
+    groups_obj = ListSerializer(child=UserGroupSerializer(), read_only=True, source="ak_groups")
     uid = CharField(read_only=True)
     username = CharField(max_length=150)
 
@@ -470,7 +489,7 @@ class UserViewSet(UsedByMixin, ModelViewSet):
     # pylint: disable=invalid-name, unused-argument
     def recovery_email(self, request: Request, pk: int) -> Response:
         """Create a temporary link that a user can use to recover their accounts"""
-        for_user = self.get_object()
+        for_user: User = self.get_object()
         if for_user.email == "":
             LOGGER.debug("User doesn't have an email address")
             return Response(status=404)
@@ -488,8 +507,9 @@ class UserViewSet(UsedByMixin, ModelViewSet):
         email_stage: EmailStage = stages.first()
         message = TemplateEmailMessage(
             subject=_(email_stage.subject),
-            template_name=email_stage.template,
             to=[for_user.email],
+            template_name=email_stage.template,
+            language=for_user.locale(request),
             template_context={
                 "url": link,
                 "user": for_user,

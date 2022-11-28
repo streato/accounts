@@ -16,6 +16,7 @@ if TYPE_CHECKING:
     from authentik.policies.models import PolicyBinding
 
 LOGGER = get_logger()
+CACHE_PREFIX = "goauthentik.io/policies/"
 
 
 @dataclass
@@ -44,6 +45,15 @@ class PolicyRequest:
         if not client_ip:
             return
         self.context["geoip"] = GEOIP_READER.city(client_ip)
+
+    @property
+    def should_cache(self) -> bool:
+        """Check if this request's result should be cached"""
+        if not self.user.is_authenticated:
+            return False
+        if self.debug:
+            return False
+        return True
 
     def __repr__(self) -> str:
         return self.__str__()

@@ -220,6 +220,17 @@ class User(SerializerModel, GuardianUserMixin, AbstractUser):
         """Generate a globally unique UID, based on the user ID and the hashed secret key"""
         return sha256(f"{self.id}-{settings.SECRET_KEY}".encode("ascii")).hexdigest()
 
+    def locale(self, request: Optional[HttpRequest] = None) -> str:
+        """Get the locale the user has configured"""
+        try:
+            return self.attributes.get("settings", {}).get("locale", "")
+        # pylint: disable=broad-except
+        except Exception as exc:
+            LOGGER.warning("Failed to get default locale", exc=exc)
+        if request:
+            return request.tenant.locale
+        return ""
+
     @property
     def avatar(self) -> str:
         """Get avatar, depending on authentik.avatar setting"""
@@ -286,7 +297,7 @@ class Provider(SerializerModel):
         raise NotImplementedError
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
 
 class Application(SerializerModel, PolicyBindingModel):
@@ -368,7 +379,7 @@ class Application(SerializerModel, PolicyBindingModel):
             return None
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     class Meta:
 
@@ -410,6 +421,12 @@ class Source(ManagedModel, SerializerModel, PolicyBindingModel):
 
     enabled = models.BooleanField(default=True)
     property_mappings = models.ManyToManyField("PropertyMapping", default=None, blank=True)
+    icon = models.FileField(
+        upload_to="source-icons/",
+        default=None,
+        null=True,
+        max_length=500,
+    )
 
     authentication_flow = models.ForeignKey(
         "authentik_flows.Flow",
@@ -443,6 +460,16 @@ class Source(ManagedModel, SerializerModel, PolicyBindingModel):
 
     objects = InheritanceManager()
 
+    @property
+    def get_icon(self) -> Optional[str]:
+        """Get the URL to the Icon. If the name is /static or
+        starts with http it is returned as-is"""
+        if not self.icon:
+            return None
+        if "://" in self.icon.name or self.icon.name.startswith("/static"):
+            return self.icon.name
+        return self.icon.url
+
     def get_user_path(self) -> str:
         """Get user path, fallback to default for formatting errors"""
         try:
@@ -470,7 +497,22 @@ class Source(ManagedModel, SerializerModel, PolicyBindingModel):
         return None
 
     def __str__(self):
-        return self.name
+        return str(self.name)
+
+    class Meta:
+
+        indexes = [
+            models.Index(
+                fields=[
+                    "slug",
+                ]
+            ),
+            models.Index(
+                fields=[
+                    "name",
+                ]
+            ),
+        ]
 
 
 class UserSourceConnection(SerializerModel, CreatedUpdatedModel):

@@ -6,6 +6,7 @@ postgresql:
   user: authentik
   port: 5432
   password: 'env://POSTGRES_PASSWORD'
+  use_pgbouncer: false
 
 listen:
   listen_http: 0.0.0.0:9000
@@ -18,10 +19,7 @@ redis:
   password: ''
   tls: false
   tls_reqs: "none"
-  cache_db: 0
-  message_queue_db: 1
-  ws_db: 2
-  outpost_session_db: 3
+  db: 0
   cache_timeout: 300
   cache_timeout_flows: 300
   cache_timeout_policies: 300
@@ -34,6 +32,7 @@ log_level: info
 # Error reporting, sends stacktrace to sentry.beryju.org
 error_reporting:
   enabled: false
+  sentry_dsn: https://a579bb09306d4f8b8d8847c052d3a1d3@sentry.beryju.org/8
   environment: customer
   send_pii: false
   sample_rate: 0.1
@@ -48,6 +47,13 @@ email:
   use_ssl: false
   timeout: 10
   from: authentik@localhost
+  template_dir: /templates
+
+throttle:
+  providers:
+    oauth2:
+      device: 20/hour
+  default: 1000/second
 
 outposts:
   # Placeholders:
@@ -76,7 +82,7 @@ default_user_change_username: true
 
 gdpr_compliance: true
 cert_discovery_dir: /certs
-default_token_length: 128
+default_token_length: 60
 impersonation: true
 
 blueprints_dir: /blueprints

@@ -5,6 +5,7 @@ GRANT_TYPE_IMPLICIT = "implicit"
 GRANT_TYPE_REFRESH_TOKEN = "refresh_token"  # nosec
 GRANT_TYPE_CLIENT_CREDENTIALS = "client_credentials"
 GRANT_TYPE_PASSWORD = "password"  # nosec
+GRANT_TYPE_DEVICE_CODE = "urn:ietf:params:oauth:grant-type:device_code"
 
 CLIENT_ASSERTION_TYPE = "client_assertion_type"
 CLIENT_ASSERTION = "client_assertion"
@@ -30,3 +31,9 @@ SCOPE_GITHUB_USER_EMAIL = "user:email"
 SCOPE_GITHUB_ORG_READ = "read:org"
 
 ACR_AUTHENTIK_DEFAULT = "goauthentik.io/providers/oauth2/default"
+
+# https://datatracker.ietf.org/doc/html/draft-ietf-oauth-amr-values-06#section-2
+AMR_PASSWORD = "pwd"  # nosec
+AMR_MFA = "mfa"
+AMR_OTP = "otp"
+AMR_WEBAUTHN = "user"

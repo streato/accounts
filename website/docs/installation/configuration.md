@@ -32,16 +32,14 @@ kubectl exec -it deployment/authentik-worker -c authentik -- ak dump_config
 -   `AUTHENTIK_POSTGRESQL__USER`: Database user
 -   `AUTHENTIK_POSTGRESQL__PORT`: Database port, defaults to 5432
 -   `AUTHENTIK_POSTGRESQL__PASSWORD`: Database password, defaults to the environment variable `POSTGRES_PASSWORD`
+-   `AUTHENTIK_POSTGRESQL__USE_PGBOUNCER`: Adjust configuration to support connection to PgBouncer
 
 ## Redis Settings
 
 -   `AUTHENTIK_REDIS__HOST`: Hostname of your Redis Server
 -   `AUTHENTIK_REDIS__PORT`: Redis port, defaults to 6379
 -   `AUTHENTIK_REDIS__PASSWORD`: Password for your Redis Server
--   `AUTHENTIK_REDIS__CACHE_DB`: Database for caching, defaults to 0
--   `AUTHENTIK_REDIS__MESSAGE_QUEUE_DB`: Database for the message queue, defaults to 1
--   `AUTHENTIK_REDIS__WS_DB`: Database for websocket connections, defaults to 2
--   `AUTHENTIK_REDIS__OUTPOST_SESSION_DB`: Database for sessions for the embedded outpost, defaults to 3
+-   `AUTHENTIK_REDIS__DB`: Database, defaults to 0
 -   `AUTHENTIK_REDIS__CACHE_TIMEOUT`: Timeout for cached data until it expires in seconds, defaults to 300
 -   `AUTHENTIK_REDIS__CACHE_TIMEOUT_FLOWS`: Timeout for cached flow plans until they expire in seconds, defaults to 300
 -   `AUTHENTIK_REDIS__CACHE_TIMEOUT_POLICIES`: Timeout for cached policies until they expire in seconds, defaults to 300
@@ -68,6 +66,12 @@ Log level for the server and worker containers. Possible values: debug, info, wa
 
 Starting with 2021.12.3, you can also set the log level to _trace_. This has no affect on the core authentik server, but shows additional messages for the embedded outpost.
 
+:::danger
+Setting the log level to `trace` will include sensitive details in logs, so it shouldn't be used in most cases.
+
+Logs generated with `trace` should be treated with care as they can give others access to your instance, and can potentially include things like session cookies to authentik **and other pages**.
+:::
+
 Defaults to `info`.
 
 ### `AUTHENTIK_COOKIE_DOMAIN`
@@ -86,9 +90,20 @@ Disable the inbuilt update-checker. Defaults to `false`.
 
     Error reports are sent to https://sentry.beryju.org, and are used for debugging and general feedback. Anonymous performance data is also sent.
 
+-   `AUTHENTIK_ERROR_REPORTING__SENTRY_DSN`
+
+    Sets the DSN for the Sentry API endpoint. Defaults to `https://sentry.beryju.org`.
+
+    When error reporting is enabled, the default Sentry DSN will allow the authentik developers to receive error reports and anonymous performance data, which is used for general feedback about authentik, and in some cases, may be used for debugging purposes.
+
+    Users can create their own hosted Sentry account (or self-host Sentry) and opt to collect this data themselves.
+
 -   `AUTHENTIK_ERROR_REPORTING__ENVIRONMENT`
 
-    Unique environment that is attached to your error reports, should be set to your email address for example. Defaults to `customer`.
+    The environment tag associated with all data sent to Sentry. Defaults to `customer`.
+
+    When error reporting has been enabled to aid in debugging issues, this should be set to a unique
+    value, such as an e-mail address.
 
 -   `AUTHENTIK_ERROR_REPORTING__SEND_PII`
 
@@ -209,7 +224,7 @@ When enabled, all the events caused by a user will be deleted upon the user's de
 Requires authentik 2022.4.1
 :::
 
-Configure the length of generated tokens. Defaults to 128.
+Configure the length of generated tokens. Defaults to 60.
 
 ### `AUTHENTIK_IMPERSONATION`
 

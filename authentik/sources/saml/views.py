@@ -153,17 +153,17 @@ class ACSView(View):
         source: SAMLSource = get_object_or_404(SAMLSource, slug=source_slug)
         if not source.enabled:
             raise Http404
-        processor = ResponseProcessor(source)
+        processor = ResponseProcessor(source, request)
         try:
-            processor.parse(request)
+            processor.parse()
         except MissingSAMLResponse as exc:
             return bad_request_message(request, str(exc))
         except VerificationError as exc:
             return bad_request_message(request, str(exc))
 
         try:
-            return processor.prepare_flow(request)
-        except UnsupportedNameIDFormat as exc:
+            return processor.prepare_flow_manager().get_flow()
+        except (UnsupportedNameIDFormat, ValueError) as exc:
             return bad_request_message(request, str(exc))
 
 

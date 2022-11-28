@@ -38,7 +38,6 @@ class TestProviderLDAP(SeleniumTestCase):
             image=self.get_container_image("ghcr.io/goauthentik/dev-ldap"),
             detach=True,
             network_mode="host",
-            auto_remove=True,
             environment={
                 "AUTHENTIK_HOST": self.live_server_url,
                 "AUTHENTIK_TOKEN": outpost.token.key,
@@ -157,7 +156,7 @@ class TestProviderLDAP(SeleniumTestCase):
             Event.objects.filter(
                 action=EventAction.LOGIN_FAILED,
                 user={"pk": anon.pk, "email": anon.email, "username": anon.username},
-            )
+            ).exists(),
         )
 
     @retry()

@@ -118,16 +118,17 @@ class AuthenticatorDuoStageViewSet(UsedByMixin, ModelViewSet):
             .first()
         )
         if not user:
-            return Response(data={"non_field_errors": ["user does not exist"]}, status=400)
+            return Response(data={"non_field_errors": ["User does not exist."]}, status=400)
         device = DuoDevice.objects.filter(
             duo_user_id=request.data.get("duo_user_id"), user=user, stage=stage
         ).first()
         if device:
-            return Response(data={"non_field_errors": ["device exists already"]}, status=400)
+            return Response(data={"non_field_errors": ["Device exists already."]}, status=400)
         DuoDevice.objects.create(
             duo_user_id=request.data.get("duo_user_id"),
             user=user,
             stage=stage,
+            confirmed=True,
             name="Imported Duo Authenticator",
         )
         return Response(status=204)

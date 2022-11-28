@@ -261,7 +261,7 @@ class OAuthAuthorizationParams:
             code.code_challenge = self.code_challenge
             code.code_challenge_method = self.code_challenge_method
 
-        code.expires_at = timezone.now() + timedelta_from_string(self.provider.access_code_validity)
+        code.expires = timezone.now() + timedelta_from_string(self.provider.access_code_validity)
         code.scope = self.scope
         code.nonce = self.nonce
         code.is_open_id = SCOPE_OPENID in self.scope
@@ -343,11 +343,10 @@ class AuthorizationFlowInitView(PolicyAccessView):
         ):
             self.request.session[SESSION_KEY_NEEDS_LOGIN] = True
             return self.handle_no_permission()
+        scope_descriptions = UserInfoView().get_scope_descriptions(self.params.scope)
         # Regardless, we start the planner and return to it
         planner = FlowPlanner(self.provider.authorization_flow)
-        # planner.use_cache = False
         planner.allow_empty_flows = True
-        scope_descriptions = UserInfoView().get_scope_descriptions(self.params.scope)
         plan = planner.plan(
             self.request,
             {
@@ -526,6 +525,7 @@ class OAuthFulfillmentStage(StageView):
             user=self.request.user,
             scope=self.params.scope,
             request=self.request,
+            expiry=timedelta_from_string(self.provider.access_code_validity),
         )
 
         # Check if response_type must include access_token in the response.

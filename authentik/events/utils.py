@@ -2,6 +2,7 @@
 import re
 from dataclasses import asdict, is_dataclass
 from pathlib import Path
+from types import GeneratorType
 from typing import Any, Optional
 from uuid import UUID
 
@@ -14,6 +15,7 @@ from django.views.debug import SafeExceptionReporterFilter
 from geoip2.models import City
 from guardian.utils import get_anonymous_user
 
+from authentik.blueprints.v1.common import YAMLTag
 from authentik.core.models import User
 from authentik.events.geo import GEOIP_READER
 from authentik.policies.types import PolicyRequest
@@ -92,6 +94,8 @@ def sanitize_item(value: Any) -> Any:
         value = asdict(value)
     if isinstance(value, dict):
         return sanitize_dict(value)
+    if isinstance(value, GeneratorType):
+        return sanitize_item(list(value))
     if isinstance(value, list):
         new_values = []
         for item in value:
@@ -110,6 +114,10 @@ def sanitize_item(value: Any) -> Any:
     if isinstance(value, City):
         return GEOIP_READER.city_to_dict(value)
     if isinstance(value, Path):
+        return str(value)
+    if isinstance(value, Exception):
+        return str(value)
+    if isinstance(value, YAMLTag):
         return str(value)
     if isinstance(value, type):
         return {

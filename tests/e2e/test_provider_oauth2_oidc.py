@@ -41,10 +41,9 @@ class TestProviderOAuth2OIDC(SeleniumTestCase):
         sleep(1)
         client: DockerClient = from_env()
         container = client.containers.run(
-            image="ghcr.io/beryju/oidc-test-client:latest",
+            image="ghcr.io/beryju/oidc-test-client:v1",
             detach=True,
             network_mode="host",
-            auto_remove=True,
             healthcheck=Healthcheck(
                 test=["CMD", "wget", "--spider", "http://localhost:9009/health"],
                 interval=5 * 100 * 1000000,

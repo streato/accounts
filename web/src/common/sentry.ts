@@ -14,7 +14,7 @@ export async function configureSentry(canDoPpi = false): Promise<Config> {
     const cfg = await config();
     if (cfg.errorReporting.enabled) {
         Sentry.init({
-            dsn: "https://a579bb09306d4f8b8d8847c052d3a1d3@sentry.beryju.org/8",
+            dsn: cfg.errorReporting.sentryDsn,
             ignoreErrors: [
                 /network/gi,
                 /fetch/gi,
@@ -80,5 +80,5 @@ export function currentInterface(): string {
     if (pathMatches && pathMatches.length >= 2) {
         currentInterface = pathMatches[1];
     }
-    return currentInterface;
+    return currentInterface.toLowerCase();
 }

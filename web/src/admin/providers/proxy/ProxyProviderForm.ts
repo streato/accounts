@@ -9,7 +9,7 @@ import { t } from "@lingui/macro";
 
 import { CSSResult, css } from "lit";
 import { TemplateResult, html } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, state } from "lit/decorators.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { until } from "lit/directives/until.js";
 
@@ -56,10 +56,10 @@ export class ProxyProviderFormPage extends ModelForm<ProxyProvider, number> {
             });
     }
 
-    @property({ type: Boolean })
+    @state()
     showHttpBasic = true;
 
-    @property({ attribute: false })
+    @state()
     mode: ProxyMode = ProxyMode.Proxy;
 
     getSuccessMessage(): string {
@@ -72,6 +72,9 @@ export class ProxyProviderFormPage extends ModelForm<ProxyProvider, number> {
 
     send = (data: ProxyProvider): Promise<ProxyProvider> => {
         data.mode = this.mode;
+        if (this.mode !== ProxyMode.ForwardDomain) {
+            data.cookieDomain = "";
+        }
         if (this.instance) {
             return new ProvidersApi(DEFAULT_CONFIG).providersProxyUpdate({
                 id: this.instance.pk || 0,
@@ -85,9 +88,6 @@ export class ProxyProviderFormPage extends ModelForm<ProxyProvider, number> {
     };
 
     renderHttpBasic(): TemplateResult {
-        if (!this.showHttpBasic) {
-            return html``;
-        }
         return html`<ak-form-element-horizontal
                 label=${t`HTTP-Basic Username Key`}
                 name="basicAuthUserAttribute"
@@ -346,6 +346,7 @@ export class ProxyProviderFormPage extends ModelForm<ProxyProvider, number> {
                                     .cryptoCertificatekeypairsList({
                                         ordering: "name",
                                         hasKey: true,
+                                        includeDetails: false,
                                     })
                                     .then((keys) => {
                                         return keys.results.map((key) => {
@@ -441,7 +442,7 @@ ${this.instance?.skipPathRegex}</textarea
                             ${t`Set a custom HTTP-Basic Authentication header based on values from authentik.`}
                         </p>
                     </ak-form-element-horizontal>
-                    ${this.renderHttpBasic()}
+                    ${this.showHttpBasic ? this.renderHttpBasic() : html``}
                 </div>
             </ak-form-group>
         </form>`;

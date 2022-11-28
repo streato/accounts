@@ -16,6 +16,7 @@ import (
 )
 
 var initialSetup = false
+var tlsTransport *http.RoundTripper = nil
 
 func doGlobalSetup(outpost api.Outpost, globalConfig *api.Config) {
 	l := log.WithField("logger", "authentik.outpost")
@@ -44,12 +45,11 @@ func doGlobalSetup(outpost api.Outpost, globalConfig *api.Config) {
 	}
 
 	if globalConfig.ErrorReporting.Enabled {
-		dsn := "https://a579bb09306d4f8b8d8847c052d3a1d3@sentry.beryju.org/8"
 		if !initialSetup {
 			l.WithField("env", globalConfig.ErrorReporting.Environment).Debug("Error reporting enabled")
 		}
 		err := sentry.Init(sentry.ClientOptions{
-			Dsn:           dsn,
+			Dsn:           globalConfig.ErrorReporting.SentryDsn,
 			Environment:   globalConfig.ErrorReporting.Environment,
 			TracesSampler: sentryutils.SamplerFunc(float64(globalConfig.ErrorReporting.TracesSampleRate)),
 			Release:       fmt.Sprintf("authentik@%s", constants.VERSION),
@@ -71,15 +71,19 @@ func doGlobalSetup(outpost api.Outpost, globalConfig *api.Config) {
 
 // GetTLSTransport Get a TLS transport instance, that skips verification if configured via environment variables.
 func GetTLSTransport() http.RoundTripper {
+	if tlsTransport != nil {
+		return *tlsTransport
+	}
 	value, set := os.LookupEnv("AUTHENTIK_INSECURE")
 	if !set {
 		value = "false"
 	}
-	tlsTransport, err := httptransport.TLSTransport(httptransport.TLSClientOptions{
+	tmp, err := httptransport.TLSTransport(httptransport.TLSClientOptions{
 		InsecureSkipVerify: strings.ToLower(value) == "true",
 	})
 	if err != nil {
 		panic(err)
 	}
-	return tlsTransport
+	tlsTransport = &tmp
+	return *tlsTransport
 }

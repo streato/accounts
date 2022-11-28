@@ -19,7 +19,7 @@ WORKDIR /work/web
 RUN npm ci && npm run build
 
 # Stage 3: Poetry to requirements.txt export
-FROM docker.io/python:3.10.7-slim-bullseye AS poetry-locker
+FROM docker.io/python:3.11.0-slim-bullseye AS poetry-locker
 
 WORKDIR /work
 COPY ./pyproject.toml /work
@@ -30,7 +30,7 @@ RUN pip install --no-cache-dir poetry && \
     poetry export -f requirements.txt --dev --output requirements-dev.txt
 
 # Stage 4: Build go proxy
-FROM docker.io/golang:1.19.1-bullseye AS go-builder
+FROM docker.io/golang:1.19.3-bullseye AS go-builder
 
 WORKDIR /work
 
@@ -43,10 +43,10 @@ COPY ./internal /work/internal
 COPY ./go.mod /work/go.mod
 COPY ./go.sum /work/go.sum
 
-RUN go build -o /work/authentik ./cmd/server/main.go
+RUN go build -o /work/authentik ./cmd/server/
 
 # Stage 5: Run
-FROM docker.io/python:3.10.7-slim-bullseye AS final-image
+FROM docker.io/python:3.11.0-slim-bullseye AS final-image
 
 LABEL org.opencontainers.image.url https://goauthentik.io
 LABEL org.opencontainers.image.description goauthentik.io Main server image, see https://goauthentik.io for more info.
@@ -62,7 +62,7 @@ COPY --from=poetry-locker /work/requirements-dev.txt /
 
 RUN apt-get update && \
     # Required for installing pip packages
-    apt-get install -y --no-install-recommends build-essential pkg-config libxmlsec1-dev && \
+    apt-get install -y --no-install-recommends build-essential pkg-config libxmlsec1-dev zlib1g-dev && \
     # Required for runtime
     apt-get install -y --no-install-recommends libxmlsec1-openssl libmaxminddb0 && \
     # Required for bootstrap & healtcheck
@@ -80,6 +80,7 @@ RUN apt-get update && \
 COPY ./authentik/ /authentik
 COPY ./pyproject.toml /
 COPY ./xml /xml
+COPY ./locale /locale
 COPY ./tests /tests
 COPY ./manage.py /
 COPY ./blueprints /blueprints

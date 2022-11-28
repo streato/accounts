@@ -1,13 +1,12 @@
 """Flow API Views"""
 from django.core.cache import cache
 from django.http import HttpResponse
-from django.http.response import HttpResponseBadRequest
 from django.urls import reverse
 from django.utils.translation import gettext as _
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.decorators import action
-from rest_framework.fields import ReadOnlyField
+from rest_framework.fields import BooleanField, DictField, ListField, ReadOnlyField
 from rest_framework.parsers import MultiPartParser
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -19,17 +18,19 @@ from authentik.api.decorators import permission_required
 from authentik.blueprints.v1.exporter import FlowExporter
 from authentik.blueprints.v1.importer import Importer
 from authentik.core.api.used_by import UsedByMixin
-from authentik.core.api.utils import (
-    CacheSerializer,
-    FilePathSerializer,
-    FileUploadSerializer,
-    LinkSerializer,
-)
+from authentik.core.api.utils import CacheSerializer, LinkSerializer, PassiveSerializer
+from authentik.events.utils import sanitize_dict
 from authentik.flows.api.flows_diagram import FlowDiagram, FlowDiagramSerializer
 from authentik.flows.exceptions import FlowNonApplicableException
 from authentik.flows.models import Flow
-from authentik.flows.planner import PLAN_CONTEXT_PENDING_USER, FlowPlanner, cache_key
+from authentik.flows.planner import CACHE_PREFIX, PLAN_CONTEXT_PENDING_USER, FlowPlanner, cache_key
 from authentik.flows.views.executor import SESSION_KEY_HISTORY, SESSION_KEY_PLAN
+from authentik.lib.utils.file import (
+    FilePathSerializer,
+    FileUploadSerializer,
+    set_file,
+    set_file_url,
+)
 from authentik.lib.views import bad_request_message
 
 LOGGER = get_logger()
@@ -38,10 +39,9 @@ LOGGER = get_logger()
 class FlowSerializer(ModelSerializer):
     """Flow Serializer"""
 
-    cache_count = SerializerMethodField()
-
     background = ReadOnlyField(source="background_url")
 
+    cache_count = SerializerMethodField()
     export_url = SerializerMethodField()
 
     def get_cache_count(self, flow: Flow) -> int:
@@ -77,10 +77,39 @@ class FlowSerializer(ModelSerializer):
         }
 
 
+class FlowSetSerializer(FlowSerializer):
+    """Stripped down flow serializer"""
+
+    class Meta:
+
+        model = Flow
+        fields = [
+            "pk",
+            "policybindingmodel_ptr_id",
+            "name",
+            "slug",
+            "title",
+            "designation",
+            "background",
+            "policy_engine_mode",
+            "compatibility_mode",
+            "export_url",
+            "layout",
+            "denied_action",
+        ]
+
+
+class FlowImportResultSerializer(PassiveSerializer):
+    """Logs of an attempted flow import"""
+
+    logs = ListField(child=DictField(), read_only=True)
+    success = BooleanField(read_only=True)
+
+
 class FlowViewSet(UsedByMixin, ModelViewSet):
     """Flow Viewset"""
 
-    queryset = Flow.objects.all()
+    queryset = Flow.objects.all().prefetch_related("stages", "policies")
     serializer_class = FlowSerializer
     lookup_field = "slug"
     ordering = ["slug", "name"]
@@ -92,7 +121,7 @@ class FlowViewSet(UsedByMixin, ModelViewSet):
     @action(detail=False, pagination_class=None, filter_backends=[])
     def cache_info(self, request: Request) -> Response:
         """Info about cached flows"""
-        return Response(data={"count": len(cache.keys("flow_*"))})
+        return Response(data={"count": len(cache.keys(f"{CACHE_PREFIX}*"))})
 
     @permission_required(None, ["authentik_flows.clear_flow_cache"])
     @extend_schema(
@@ -105,7 +134,7 @@ class FlowViewSet(UsedByMixin, ModelViewSet):
     @action(detail=False, methods=["POST"])
     def cache_clear(self, request: Request) -> Response:
         """Clear flow cache"""
-        keys = cache.keys("flow_*")
+        keys = cache.keys(f"{CACHE_PREFIX}*")
         cache.delete_many(keys)
         LOGGER.debug("Cleared flow cache", keys=len(keys))
         return Response(status=204)
@@ -130,25 +159,38 @@ class FlowViewSet(UsedByMixin, ModelViewSet):
     @extend_schema(
         request={"multipart/form-data": FileUploadSerializer},
         responses={
-            204: OpenApiResponse(description="Successfully imported flow"),
-            400: OpenApiResponse(description="Bad request"),
+            204: FlowImportResultSerializer,
+            400: FlowImportResultSerializer,
         },
     )
-    @action(detail=False, methods=["POST"], parser_classes=(MultiPartParser,))
+    @action(url_path="import", detail=False, methods=["POST"], parser_classes=(MultiPartParser,))
     def import_flow(self, request: Request) -> Response:
         """Import flow from .yaml file"""
+        import_response = FlowImportResultSerializer(
+            data={
+                "logs": [],
+                "success": False,
+            }
+        )
+        import_response.is_valid()
         file = request.FILES.get("file", None)
         if not file:
-            return HttpResponseBadRequest()
+            return Response(data=import_response.initial_data, status=400)
+
         importer = Importer(file.read().decode())
-        valid, _logs = importer.validate()
-        # TODO: return logs
+        valid, logs = importer.validate()
+        import_response.initial_data["logs"] = [sanitize_dict(log) for log in logs]
+        import_response.initial_data["success"] = valid
+        import_response.is_valid()
         if not valid:
-            return HttpResponseBadRequest()
+            return Response(data=import_response.initial_data, status=200)
+
         successful = importer.apply()
+        import_response.initial_data["success"] = successful
+        import_response.is_valid()
         if not successful:
-            return HttpResponseBadRequest()
-        return Response(status=204)
+            return Response(data=import_response.initial_data, status=200)
+        return Response(data=import_response.initial_data, status=200)
 
     @permission_required(
         "authentik_flows.export_flow",
@@ -206,21 +248,7 @@ class FlowViewSet(UsedByMixin, ModelViewSet):
     def set_background(self, request: Request, slug: str):
         """Set Flow background"""
         flow: Flow = self.get_object()
-        background = request.FILES.get("file", None)
-        clear = request.data.get("clear", "false").lower() == "true"
-        if clear:
-            if flow.background_url.startswith("/media"):
-                # .delete() saves the model by default
-                flow.background.delete()
-            else:
-                flow.background = None
-                flow.save()
-            return Response({})
-        if background:
-            flow.background = background
-            flow.save()
-            return Response({})
-        return HttpResponseBadRequest()
+        return set_file(request, flow, "background")
 
     @permission_required("authentik_core.change_application")
     @extend_schema(
@@ -240,12 +268,7 @@ class FlowViewSet(UsedByMixin, ModelViewSet):
     def set_background_url(self, request: Request, slug: str):
         """Set Flow background (as URL)"""
         flow: Flow = self.get_object()
-        url = request.data.get("url", None)
-        if not url:
-            return HttpResponseBadRequest()
-        flow.background.name = url
-        flow.save()
-        return Response({})
+        return set_file_url(request, flow, "background")
 
     @extend_schema(
         responses={

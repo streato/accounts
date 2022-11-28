@@ -41,6 +41,9 @@ class PolicyBindingModel(models.Model):
 
     objects = InheritanceManager()
 
+    def __str__(self) -> str:
+        return f"PolicyBindingModel {self.pbm_uuid}"
+
     class Meta:
         verbose_name = _("Policy Binding Model")
         verbose_name_plural = _("Policy Binding Models")
@@ -135,12 +138,19 @@ class PolicyBinding(SerializerModel):
             return f"Binding from {self.target} #{self.order} to {suffix}"
         except PolicyBinding.target.RelatedObjectDoesNotExist:  # pylint: disable=no-member
             return f"Binding - #{self.order} to {suffix}"
+        return ""
 
     class Meta:
 
         verbose_name = _("Policy Binding")
         verbose_name_plural = _("Policy Bindings")
         unique_together = ("policy", "target", "order")
+        indexes = [
+            models.Index(fields=["policy"]),
+            models.Index(fields=["group"]),
+            models.Index(fields=["user"]),
+            models.Index(fields=["target"]),
+        ]
 
 
 class Policy(SerializerModel, CreatedUpdatedModel):
@@ -169,7 +179,7 @@ class Policy(SerializerModel, CreatedUpdatedModel):
         raise NotImplementedError
 
     def __str__(self):
-        return self.name
+        return str(self.name)
 
     def passes(self, request: PolicyRequest) -> PolicyResult:  # pragma: no cover
         """Check if request passes this policy"""
@@ -184,4 +194,11 @@ class Policy(SerializerModel, CreatedUpdatedModel):
         permissions = [
             ("view_policy_cache", "View Policy's cache metrics"),
             ("clear_policy_cache", "Clear Policy's cache metrics"),
+        ]
+
+    class PolicyMeta:
+        """Base class for the Meta class for all policies"""
+
+        indexes = [
+            models.Index(fields=["policy_ptr_id"]),
         ]
